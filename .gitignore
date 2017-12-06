@@ -1,0 +1,13 @@
+
+/srsc/public/storage
+/src/public/hot
+/src/storage/*.key
+/vendor
+/.idea
+/src/.env
+.env.testing
+composer.lock
+/src/phpunitcoverage
+/src/phpunitlogs
+/docker-data
+/.wercker

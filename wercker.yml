@@ -1,0 +1,101 @@
+pipeline-tester:
+  box: quay.io/steven_rho/aws-cli
+  steps:
+    - script:
+        name: Check Envronment variables
+        code: |
+          env
+
+push-to-quayio:
+  box:
+    id: quay.io/cashrewards/php-base-ms
+    username: $QUAYIO_USERNAME
+    password: $QUAYIO_PASSWORD
+    tag: master
+    registry: https://quay.io
+  steps:
+    - script:
+        name: install composer
+        code: curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+    - script:
+        name: mv static files
+        code: |
+           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
+           chown -R :www-data /var/www/html
+           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+    - script:
+        name: update dependencies
+        code: |
+          ls -al
+          export COMPOSER_ALLOW_SUPERUSER=1
+          composer update --no-interaction -d=/var/www/html
+
+
+    - internal/docker-push:
+        username: $QUAYIO_USERNAME
+        password: $QUAYIO_PASSWORD
+        repository: quay.io/cashrewards/crutils-metrics
+        registry: https://quay.io
+        tag: $WERCKER_GIT_BRANCH
+        working-dir: /var/www/html
+        cmd: /run.sh
+        disable-sync: false
+        volumes: /etc/nginx/conf.d/,/var/www/html/
+
+#####
+#
+#   Register Task Definition
+#
+# For your Local test :
+#   wercker --environment ./wercker/.env.wercker.deploy deploy --pipeline deploy-to-ecs-task-definition
+#
+deploy-to-ecs-task-definition:
+  box: quay.io/steven_rho/aws-cli
+  #box: python:3-slim
+  steps:
+    ### Task definition for sending metrics to geckoboard
+    - steven-rho/aws-ecs-task-definition@0.0.1:
+        name: Setup Task Definition (crutils-metrics)
+        key: $STEP_AWS_ACCESS_KEY_ID
+        secret: $STEP_AWS_SECRET_ACCESS_KEY
+        region: $STEP_AWS_DEFAULT_REGION
+        task-definition-name: crutils-metrics
+        container-memory: 512
+        container_command: null
+        task_definition_template: wercker/task_definition/task_definition.json.template
+
+#####
+#
+#   Register Service
+#
+# For your Local test :
+#   wercker --environment ./wercker/.env.wercker.deploy deploy --pipeline deploy-to-ecs-service
+#
+deploy-to-ecs-service:
+  box: quay.io/steven_rho/aws-cli
+  steps:
+    - steven-rho/aws-ecs-service:
+        name: Setup Service (crutils-metrics)
+        key: $STEP_AWS_ACCESS_KEY_ID
+        secret: $STEP_AWS_SECRET_ACCESS_KEY
+        region: $STEP_AWS_DEFAULT_REGION
+        cluster-name: $STEP_CLUSTER
+        service-name: svc-crutils-metrics
+        task-definition-name: crutils-metrics
+        desired-count: 1
+        service-template: wercker/service/service.json.template
+
+
+deploy-to-ecs-service-single:
+  box: quay.io/steven_rho/aws-cli
+  steps:
+    - steven-rho/aws-ecs-service:
+        name: Setup Service ($STEP_SERVICE_NAME)
+        key: $STEP_AWS_ACCESS_KEY_ID
+        secret: $STEP_AWS_SECRET_ACCESS_KEY
+        region: $STEP_AWS_DEFAULT_REGION
+        cluster-name: $STEP_CLUSTER
+        service-name: $STEP_SERVICE_NAME
+        task-definition-name: $STEP_TASK_DEFINITION_NAME
+        desired-count: $STEP_DESIRED_COUNT
+        service-template: wercker/service/service.json.template
