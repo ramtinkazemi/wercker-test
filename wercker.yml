@@ -1,53 +1,46 @@
-pipeline-tester:
-  box: quay.io/steven_rho/aws-cli
-  steps:
-    - script:
-        name: Check Envronment variables
-        code: |
-          env
+box:
+  id: quay.io/cashrewards/php-base-ms
+  username: $QUAYIO_USERNAME
+  password: $QUAYIO_PASSWORD
+  tag: master
+  registry: https://quay.io
 
 build:
-  box:
-    id: quay.io/cashrewards/php-base-ms
-    username: $QUAYIO_USERNAME
-    password: $QUAYIO_PASSWORD
-    tag: master
-    registry: https://quay.io
   steps:
     - script:
-        name: mv static files
+        name: copy source code
         code: |
            cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
-           chown -R :www-data /var/www/html
-           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
-
-push-to-quayio:
-  box:
-    id: quay.io/cashrewards/php-base-ms
-    username: $QUAYIO_USERNAME
-    password: $QUAYIO_PASSWORD
-    tag: master
-    registry: https://quay.io
-  steps:
-    - script:
-        name: test
-        code: |
-           ls -al /var/www/html
-
-    - script:
-        name: install composer
-        code: curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
-    - script:
-        name: mv static files
-        code: |
-           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
-           chown -R :www-data /var/www/html
-           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
     - script:
         name: update dependencies
         code: |
           export COMPOSER_ALLOW_SUPERUSER=1
           composer update --no-interaction -d=/var/www/html
+    - script:
+        name: Change permission
+        code: |
+           chown -R :www-data /var/www/html
+           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+    - script:
+        name: Copy Result to Output
+        code: |
+           cp -Rp /var/www/html "$WERCKER_OUTPUT_DIR"
+
+push-to-quayio:
+  steps:
+    - script:
+        name: test
+        code: |
+          pwd
+          ls -al $WERCKER_SOURCE_DIR
+
+    - script:
+        name: mv static files
+        code: |
+           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
+           chown -R :www-data /var/www/html
+           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+
 
 
     - internal/docker-push:
