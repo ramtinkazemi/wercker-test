@@ -52,7 +52,7 @@ push-to-quayio:
           packages: ruby
       - wantedly/pretty-slack-notify:
           webhook_url: $SLACK_WEBHOOK_URL
-          channel: crutils
+          channel: release
           username: wercker
 
 #####
@@ -81,7 +81,7 @@ deploy-to-ecs-task-definition:
           packages: ruby
       - wantedly/pretty-slack-notify:
           webhook_url: $SLACK_WEBHOOK_URL
-          channel: crutils
+          channel: release
           username: wercker
 
 #####
@@ -109,6 +109,6 @@ deploy-to-ecs-service:
           packages: ruby
       - wantedly/pretty-slack-notify:
           webhook_url: $SLACK_WEBHOOK_URL
-          channel: crutils
+          channel: release
           username: wercker
 
