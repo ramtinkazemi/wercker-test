@@ -8,6 +8,19 @@ box:
 build:
   steps:
     - script:
+        name: update dependencies
+        code: |
+          ls -al $WERCKER_SOURCE_DIR
+          ls -al $WERCKER_OUTPUT_DIR
+
+push-to-quayio:
+  steps:
+    - script:
+        name: test
+        code: |
+          pwd
+          ls -al $WERCKER_SOURCE_DIR
+    - script:
         name: copy source code
         code: |
            cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
@@ -17,31 +30,10 @@ build:
           export COMPOSER_ALLOW_SUPERUSER=1
           composer update --no-interaction -d=/var/www/html
     - script:
-        name: Change permission
+        name: set permission
         code: |
            chown -R :www-data /var/www/html
            chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
-    - script:
-        name: Copy Result to Output
-        code: |
-           cp -Rp /var/www/html/* "$WERCKER_OUTPUT_DIR"
-
-push-to-quayio:
-  steps:
-    - script:
-        name: test
-        code: |
-          pwd
-          ls -al $WERCKER_SOURCE_DIR
-
-    - script:
-        name: mv static files
-        code: |
-           cp -Rp $WERCKER_SOURCE_DIR/* /var/www/html
-           chown -R :www-data /var/www/html
-           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
-
-
 
     - internal/docker-push:
         username: $QUAYIO_USERNAME
