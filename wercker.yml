@@ -6,6 +6,21 @@ pipeline-tester:
         code: |
           env
 
+build:
+  box:
+    id: quay.io/cashrewards/php-base-ms
+    username: $QUAYIO_USERNAME
+    password: $QUAYIO_PASSWORD
+    tag: master
+    registry: https://quay.io
+  steps:
+    - script:
+        name: mv static files
+        code: |
+           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
+           chown -R :www-data /var/www/html
+           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+
 push-to-quayio:
   box:
     id: quay.io/cashrewards/php-base-ms
@@ -14,6 +29,10 @@ push-to-quayio:
     tag: master
     registry: https://quay.io
   steps:
+    - script: test
+        code: |
+           ls -al /var/www/html
+
     - script:
         name: install composer
         code: curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
@@ -26,7 +45,6 @@ push-to-quayio:
     - script:
         name: update dependencies
         code: |
-          ls -al
           export COMPOSER_ALLOW_SUPERUSER=1
           composer update --no-interaction -d=/var/www/html
 
