@@ -88,18 +88,3 @@ deploy-to-ecs-service:
         task-definition-name: crutils-metrics
         desired-count: 1
         service-template: wercker/service/service.json.template
-
-
-deploy-to-ecs-service-single:
-  box: quay.io/steven_rho/aws-cli
-  steps:
-    - steven-rho/aws-ecs-service:
-        name: Setup Service ($STEP_SERVICE_NAME)
-        key: $STEP_AWS_ACCESS_KEY_ID
-        secret: $STEP_AWS_SECRET_ACCESS_KEY
-        region: $STEP_AWS_DEFAULT_REGION
-        cluster-name: $STEP_CLUSTER
-        service-name: $STEP_SERVICE_NAME
-        task-definition-name: $STEP_TASK_DEFINITION_NAME
-        desired-count: $STEP_DESIRED_COUNT
-        service-template: wercker/service/service.json.template
