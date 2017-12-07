@@ -29,7 +29,8 @@ push-to-quayio:
     tag: master
     registry: https://quay.io
   steps:
-    - script: test
+    - script:
+        name: test
         code: |
            ls -al /var/www/html
 
