@@ -24,7 +24,7 @@ build:
     - script:
         name: Copy Result to Output
         code: |
-           cp -Rp /var/www/html "$WERCKER_OUTPUT_DIR"
+           cp -Rp /var/www/html/* "$WERCKER_OUTPUT_DIR"
 
 push-to-quayio:
   steps:
@@ -37,7 +37,7 @@ push-to-quayio:
     - script:
         name: mv static files
         code: |
-           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
+           cp -Rp $WERCKER_SOURCE_DIR/* /var/www/html
            chown -R :www-data /var/www/html
            chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
 
