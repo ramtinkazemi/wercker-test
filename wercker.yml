@@ -13,6 +13,7 @@ build:
           ls -al $WERCKER_SOURCE_DIR
           ls -al $WERCKER_OUTPUT_DIR
 
+
 push-to-quayio:
   steps:
     - script:
@@ -46,6 +47,14 @@ push-to-quayio:
         disable-sync: false
         volumes: /etc/nginx/conf.d/,/var/www/html/
 
+  after-steps:
+      - install-packages:
+          packages: ruby
+      - wantedly/pretty-slack-notify:
+          webhook_url: $SLACK_WEBHOOK_URL
+          channel: crutils
+          username: wercker
+
 #####
 #
 #   Register Task Definition
@@ -67,6 +76,13 @@ deploy-to-ecs-task-definition:
         container-memory: 512
         container_command: null
         task_definition_template: wercker/task_definition/task_definition.json.template
+  after-steps:
+      - install-packages:
+          packages: ruby
+      - wantedly/pretty-slack-notify:
+          webhook_url: $SLACK_WEBHOOK_URL
+          channel: crutils
+          username: wercker
 
 #####
 #
@@ -88,3 +104,11 @@ deploy-to-ecs-service:
         task-definition-name: crutils-metrics
         desired-count: 1
         service-template: wercker/service/service.json.template
+  after-steps:
+      - install-packages:
+          packages: ruby
+      - wantedly/pretty-slack-notify:
+          webhook_url: $SLACK_WEBHOOK_URL
+          channel: crutils
+          username: wercker
+
