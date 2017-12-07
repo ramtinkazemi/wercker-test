@@ -111,4 +111,3 @@ deploy-to-ecs-service:
           webhook_url: $SLACK_WEBHOOK_URL
           channel: release
           username: wercker
-
