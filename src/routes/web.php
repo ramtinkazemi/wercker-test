@@ -19,4 +19,4 @@ Route::get('/info', function () {
     echo phpinfo();
 });
 
-Route::resource('tasklog', 'TaskLog');
+Route::resource('/tasklog', 'TaskLog');
