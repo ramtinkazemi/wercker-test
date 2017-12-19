@@ -2,7 +2,7 @@ version: "2"
 
 services:
  php-fpm:
-    container_name: php-fpm
+    container_name: crutils-metrics-php-fpm
     build:
           context: .
           dockerfile: Dockerfile
@@ -13,7 +13,7 @@ services:
      - "9000:9000"
 
  nginx:
-    container_name: nginx
+    container_name: crutils-metrics-nginx
     image: nginx
     ports:
       - "81:80"
@@ -25,4 +25,14 @@ services:
         # /etc/nginx/conf.d/default.conf
         # /var/www/html [ image default = /usr/share/nginx/html ]
 
-
+ mysql:
+    container_name: crutils-metrics-mysql
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: CRutils_metrics
+      MYSQL_ROOT_PASSWORD: "<YourStrong!Passw0rd>"
+    ports:
+      - "3306:3306"
+    logging:
+      driver: none

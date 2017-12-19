@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class crutilstest extends Command
 {
@@ -45,6 +46,20 @@ class crutilstest extends Command
         echo env('DB_PORT')."\n";
         echo env('DB_CONNECTION')."\n";
 
+        $this->crutilsConnectionTest();
+        $this->mssqlTest();
+    }
 
+    public function crutilsConnectionTest()
+    {
+        $rows = DB::connection('crutils')->select('select * from information_schema.tables limit 2');
+        color_dump($rows);
+    }
+
+
+    public function mssqlTest()
+    {
+        $users = DB::connection('sqlsrv')->select('select TOP 2 * from Member');
+        color_dump($users);
     }
 }

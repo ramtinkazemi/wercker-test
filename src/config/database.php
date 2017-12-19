@@ -57,7 +57,7 @@ return [
         'crutils' => [
             'driver' => 'mysql',
             'host' => env('DB_HOST_crutils', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
+            'port' => env('DB_PORT_crutils', '3306'),
             'database' => env('DB_DATABASE_crutils', 'forge'),
             'username' => env('DB_USERNAME_crutils', 'forge'),
             'password' => env('DB_PASSWORD_crutils', ''),
@@ -91,6 +91,13 @@ return [
             'password' => env('DB_PASSWORD', ''),
             'charset' => 'utf8',
             'prefix' => '',
+            // Customized
+            'encrypt' => 'false',
+            'trust_server_certificate' => 'false',
+            'options'   => array(
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+                PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true
+            ),
         ],
 
     ],
