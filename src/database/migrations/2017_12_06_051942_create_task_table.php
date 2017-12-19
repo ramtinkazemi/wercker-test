@@ -13,24 +13,32 @@ class CreateTaskTable extends Migration
      */
     public function up()
     {
-        Schema::create('task', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('TaskName', 100); //the task that run for example the name of the command
-            $table->boolean('TaskComplete')->default(false);
-            $table->integer('RecordsProcessed')->default(0);
-            $table->dateTime('LastRunAT')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->primary('TaskName');
+        /*
+        Schema::create('Task', function (Blueprint $table) {
+            //$table->increments('id');
+            $table->string('ServiceName', 100)->comment('the service/app that runs the task for example DTI');
+            $table->string('TaskName', 100)->comment('the task name, for example ingest PH data');
+            $table->boolean('TaskComplete')->default(false)->comment('Set to true when a task has completed');
+            $table->integer('RecordsProcessed')->default(0)->comment('Number of records processed');
+            $table->dateTime('LastRunAT')->default(DB::raw('CURRENT_TIMESTAMP'))->comment('time the last run started at');
+            //$table->primary('TaskName');
+            $table->integer('DurationSeconds')->default(0)->comment('Number of seconds between start and finish');
+            $table->primary(['ServiceName', 'TaskName']);
             $table->timestamps();
         });
 
-        Schema::create('task', function (Blueprint $table) {
+        Schema::create('TaskLog', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('TaskName', 100); //the task that run for example the name of the command
-            $table->boolean('TaskComplete')->default(false);
-            $table->integer('RecordsProcessed')->default(0);
-            $table->index('TaskName');
+            $table->string('ServiceName', 100)->comment('the service/app that runs the task for example DTI');
+            $table->string('TaskName', 100)->comment('the task name, for example ingest PH data');
+            $table->boolean('TaskComplete')->default(false)->comment('Set to true when a task has completed');
+            $table->integer('RecordsProcessed')->default(0)->comment('Number of records processed');
+            $table->dateTime('LastRunAT')->default(DB::raw('CURRENT_TIMESTAMP'))->comment('time the last run started at');
+            $table->primary('id');
+            $table->integer('DurationSeconds')->default(0)->comment('Number of seconds between start and finish');
             $table->timestamps();
         });
+        */
     }
 
     /**
@@ -40,6 +48,7 @@ class CreateTaskTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('task');
+        Schema::dropIfExists('Task');
+        Schema::dropIfExists('TaskLog');
     }
 }
