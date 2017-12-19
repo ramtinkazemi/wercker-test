@@ -112,6 +112,22 @@
             "value": "${ES_HOST}"
           },
           {
+            "name": "DB_HOST_crutils",
+            "value": "${DB_HOST_crutils}"
+          },
+          {
+            "name": "DB_DATABASE_crutils",
+            "value": "${DB_DATABASE_crutils}"
+          },
+          {
+            "name": "DB_USERNAME_crutils",
+            "value": "${DB_USERNAME_crutils}"
+          },
+          {
+            "name": "DB_PASSWORD_crutils",
+            "value": "${DB_PASSWORD_crutils}"
+          },
+          {
             "name": "ES_HOST_CAMPAIGN",
             "value": "${ES_HOST_CAMPAIGN}"
           },
