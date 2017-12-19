@@ -2,7 +2,7 @@
 /srsc/public/storage
 /src/public/hot
 /src/storage/*.key
-/vendor
+/src/vendor
 /.idea
 /src/.env
 .env.testing
