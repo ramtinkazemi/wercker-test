@@ -114,7 +114,6 @@ class CRGeckoBoard
         $tAtt['transactioncreated6'] = 0;
         $tAtt['transactioncreated8'] = 0;
 
-
         //get total elk transactions
         $tAtt['totaltransactionselk'] = $this->est->getTotalAggResultsForQuery('*', 'cr-db-transactions-approvals', 'cr-db-transactions-approvals');
 

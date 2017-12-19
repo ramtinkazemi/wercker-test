@@ -108,7 +108,6 @@ if (! function_exists('CRLog')) {
             $logLevel = "debug";
         }
         call_user_func('Log::'.$logLevel, $description, ["class" => $class,  'method' => $method, 'line'=>$line, 'message' => $message]); // >5.2.3
-        //Log::debug($description, ["class" => $class,  'method' => $method, 'line'=>$line, 'message' => $message]);
     }
 }
 

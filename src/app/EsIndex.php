@@ -14,7 +14,6 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Ring\Future\CompletedFutureArray;
 use Psr\Http\Message\ResponseInterface;
-use Illuminate\Support\Facades\Log;
 
 class EsIndex
 {

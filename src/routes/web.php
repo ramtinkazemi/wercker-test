@@ -18,3 +18,5 @@ Route::get('/', function () {
 Route::get('/info', function () {
     echo phpinfo();
 });
+
+Route::resource('tasklog', 'TaskLog');
