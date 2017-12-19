@@ -6,13 +6,6 @@
     "type": "project",
     "repositories": [
         {
-            "type": "path",
-            "url": "packages/cashrewards/freshdesk",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
             "type": "vcs",
             "url":  "git@bitbucket.org:ShopGoDev/elasticsearch.git"
         },
@@ -28,7 +21,6 @@
         "laravel/tinker": "~1.0",
         "aws/aws-sdk-php": "3.*",
         "cashrewards/elasticsearch": "@dev",
-        "cashrewards/freshdesk": "@dev",
         "cashrewards/plainqueue": "@dev",
         "doctrine/dbal": "^2.6",
         "elasticsearch/elasticsearch": "5.2.0",
@@ -48,7 +40,7 @@
             "database/factories"
         ],
         "files": [
-            "app/Helpers/helpers.php"
+            "app/Helpers/helper.php"
         ],
         "psr-4": {
             "App\\": "app/"
