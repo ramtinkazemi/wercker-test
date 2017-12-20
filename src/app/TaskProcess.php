@@ -58,13 +58,27 @@ class TaskProcess
                     $paramsArr['TaskComplete'] = true;
 
 
-                    $t = Task::updateOrCreate(['TaskName'=> $paramsArr['TaskName'], 'ServiceName' => $paramsArr['ServiceName']], $paramsArr);
+                    try{
+
+
+                        //$t = Task::updateOrCreate(['TaskName'=> $paramsArr['TaskName'], 'ServiceName' => $paramsArr['ServiceName']], $paramsArr);
+                        $t = Task::where('ServiceName', $paramsArr['ServiceName'])->where('ServiceName', $paramsArr['ServiceName'])->where('TaskLogId', $paramsArr['TaskLogId'])->firstOrFail();
+                        $t->RecordsProcessed = $paramsArr['RecordsProcessed'];
+                        $t->TaskComplete = true;
+                        $t->DurationSeconds = $paramsArr['DurationSeconds'] ;
+                        $t->save();
+
+                    }catch(Exception $e){
+                        $result['result'] = true;
+                        $result['httpResponse'] = 404;
+                        $result['description'] = 'task not found'.$e->getMessage();
+                    }
+
 
                     $paramsArr['Id'] = $paramsArr['TaskLogId'];
                     unset($paramsArr['TaskLogId']);
 
                     // save the request
-                    //print_r($paramsArr);die;
                     TaskLog::where('id', $paramsArr['Id'])
                         ->update($paramsArr);
                     $result['result'] = true;
