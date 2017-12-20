@@ -25,6 +25,7 @@ class TaskProcess
             $paramsArr['TaskComplete'] = false;
             $paramsArr['RecordsProcessed'] = 0;
             $paramsArr['DurationSeconds'] = 0;
+            $paramsArr['LastRunAT'] = Carbon::now()->toDateString();
 
             $tl = TaskLog::create($paramsArr);
             $paramsArr['TaskLogId'] = $tl->id;
@@ -47,31 +48,39 @@ class TaskProcess
 
             $result['TaskLogId'] = $paramsArr['TaskLogId'];
             $tl = TaskLog::find($paramsArr['TaskLogId']);
-            if($tl->TaskComplete == false){
-                // get timings
-                $startTime = Carbon::parse($tl->created_at);
-                $finishTime =  Carbon::now();
+            if(count($tl)>0){
+                if($tl->TaskComplete == false){
+                    // get timings
+                    $startTime = Carbon::parse($tl->created_at);
+                    $finishTime =  Carbon::now();
 
-                $paramsArr['DurationSeconds'] = $finishTime->diffInSeconds($startTime);
-                $paramsArr['TaskComplete'] = true;
+                    $paramsArr['DurationSeconds'] = $finishTime->diffInSeconds($startTime);
+                    $paramsArr['TaskComplete'] = true;
 
-                $t = Task::updateOrCreate(['TaskName'=> $paramsArr['TaskName'], 'ServiceName' => $paramsArr['ServiceName']], $paramsArr);
 
-                $paramsArr['Id'] = $paramsArr['TaskLogId'];
-                unset($paramsArr['TaskLogId']);
+                    $t = Task::updateOrCreate(['TaskName'=> $paramsArr['TaskName'], 'ServiceName' => $paramsArr['ServiceName']], $paramsArr);
 
-                // save the request
-                //print_r($paramsArr);die;
-                TaskLog::where('id', $paramsArr['Id'])
-                    ->update($paramsArr);
-                $result['result'] = true;
-                $result['httpResponse'] = 200;
-                $result['description'] = 'task updated';
+                    $paramsArr['Id'] = $paramsArr['TaskLogId'];
+                    unset($paramsArr['TaskLogId']);
+
+                    // save the request
+                    //print_r($paramsArr);die;
+                    TaskLog::where('id', $paramsArr['Id'])
+                        ->update($paramsArr);
+                    $result['result'] = true;
+                    $result['httpResponse'] = 200;
+                    $result['description'] = 'task updated';
+                }else{
+                    $result['result'] = false;
+                    $result['httpResponse'] = 400;
+                    $result['description'] = 'task was already completed at '.$tl->updated_at;
+                }
             }else{
                 $result['result'] = false;
-                $result['httpResponse'] = 400;
-                $result['description'] = 'task was already completed at '.$tl->updated_at;
+                $result['httpResponse'] = 404;
+                $result['description'] = 'task not found';
             }
+
         }
         $this->result = $result;
     }
