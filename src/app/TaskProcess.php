@@ -53,16 +53,11 @@ class TaskProcess
                     // get timings
                     $startTime = Carbon::parse($tl->created_at);
                     $finishTime =  Carbon::now();
-
                     $paramsArr['DurationSeconds'] = $finishTime->diffInSeconds($startTime);
                     $paramsArr['TaskComplete'] = true;
-
-
                     try{
-
-
                         //$t = Task::updateOrCreate(['TaskName'=> $paramsArr['TaskName'], 'ServiceName' => $paramsArr['ServiceName']], $paramsArr);
-                        $t = Task::where('ServiceName', $paramsArr['ServiceName'])->where('ServiceName', $paramsArr['ServiceName'])->where('TaskLogId', $paramsArr['TaskLogId'])->firstOrFail();
+                        $t = Task::where('ServiceName', $paramsArr['ServiceName'])->where('ServiceName', $paramsArr['ServiceName'])->firstOrFail();
                         $t->RecordsProcessed = $paramsArr['RecordsProcessed'];
                         $t->TaskComplete = true;
                         $t->DurationSeconds = $paramsArr['DurationSeconds'] ;
@@ -72,6 +67,7 @@ class TaskProcess
                         $result['result'] = true;
                         $result['httpResponse'] = 404;
                         $result['description'] = 'task not found'.$e->getMessage();
+                        CRLog("debug", "debug statement, ".$result['httpResponse'].", ".$result['description'].", ".$e->getMessage(), json_encode($result), __CLASS__, __FUNCTION__, __LINE__);
                     }
 
 
@@ -84,15 +80,19 @@ class TaskProcess
                     $result['result'] = true;
                     $result['httpResponse'] = 200;
                     $result['description'] = 'task updated';
+                    CRLog("debug", "debug statement, ".$result['httpResponse'].", ".$result['description'], json_encode($result), __CLASS__, __FUNCTION__, __LINE__);
                 }else{
                     $result['result'] = false;
                     $result['httpResponse'] = 400;
                     $result['description'] = 'task was already completed at '.$tl->updated_at;
+                    CRLog("debug", "debug statement: ".$result['httpResponse'].", ".$result['description'], json_encode($result), __CLASS__, __FUNCTION__, __LINE__);
                 }
             }else{
+
                 $result['result'] = false;
                 $result['httpResponse'] = 404;
                 $result['description'] = 'task not found';
+                CRLog("debug", "debug statement: ".$result['httpResponse'].", ".$result['description'], json_encode($result), __CLASS__, __FUNCTION__, __LINE__);
             }
 
         }
