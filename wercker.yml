@@ -105,6 +105,16 @@ deploy-to-ecs-task-definition:
         container-memory: 512
         container_command: null
         task_definition_template: wercker/task_definition/task_definition.json.template
+    ### Task definition for sending metrics to geckoboard
+    - steven-rho/aws-ecs-task-definition@0.0.1:
+        name: Setup Task Definition (crutils-geckoboard)
+        key: $STEP_AWS_ACCESS_KEY_ID
+        secret: $STEP_AWS_SECRET_ACCESS_KEY
+        region: $STEP_AWS_DEFAULT_REGION
+        task-definition-name: crutils-geckoboard
+        container-memory: 512
+        container_command: "[\"/usr/bin/php\",\"/var/www/laravel/artisan\", \"crutils:geckoboard:update\"]"
+        task_definition_template: wercker/task_definition/crutils.json.template
 
   after-steps:
       - install-packages:
@@ -156,3 +166,25 @@ deploy-to-ecs-service:
 #          webhook_url: $SLACK_WEBHOOK_URL
 #          channel: releases
 #          username: wercker
+
+deploy-to-ecs-scheduled-task:
+  box: quay.io/steven_rho/aws-cli
+  steps:
+
+    #####
+    # Scheduled task: every 10 minutes
+    #####
+    - steven-rho/aws-ecs-scheduled-task@0.0.4:
+       name: daily-every-10-minutes (crutils-geckoboard)
+       key: $STEP_AWS_ACCESS_KEY_ID
+       secret: $STEP_AWS_SECRET_ACCESS_KEY
+       region: $STEP_AWS_DEFAULT_REGION
+       schedule-rule-name: daily-every-10-minutes
+       schedule-expression: "cron(*/10 * * * ? *)"
+       schedule-state: $STEP_SCHEDULE_STATE
+       schedule-description: "Tasks that need to run every 10 minutes like geckoboard dataset"
+       cluster-name: ${STEP_CLUSTER}
+       task-count: 1
+       task-definition-name: crutils-geckoboard
+       target-id: crutils-geckoboard
+       target-template: wercker/scheduled_task/ecs_task_target.json.template
