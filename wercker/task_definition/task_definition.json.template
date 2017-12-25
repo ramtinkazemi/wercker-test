@@ -128,6 +128,22 @@
             "value": "${DB_PASSWORD_crutils}"
           },
           {
+          "name": "DB_HOST_shopgo",
+          "value": "${DB_HOST_shopgo}"
+          },
+          {
+          "name": "DB_DATABASE_shopgo",
+          "value": "${DB_DATABASE_shopgo}"
+          },
+          {
+          "name": "DB_USERNAME_shopgo",
+          "value": "${DB_USERNAME_shopgo}"
+          },
+          {
+          "name": "DB_PASSWORD_shopgo",
+          "value": "${DB_PASSWORD_shopgo}"
+          },
+          {
             "name": "ES_HOST_CAMPAIGN",
             "value": "${ES_HOST_CAMPAIGN}"
           },

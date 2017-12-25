@@ -75,8 +75,8 @@ class CRGeckoBoard
      * Send the various batches
      */
     public function sendBatchSQL(){
-      //  $this->updateMemberDataSet();
-      //  $this->updateSystemDataSet();
+        $this->updateMemberDataSet();
+        $this->updateSystemDataSet();
         $this->updateReportSubscription();
     }
 
