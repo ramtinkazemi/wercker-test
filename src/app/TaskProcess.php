@@ -56,17 +56,23 @@ class TaskProcess
                     $paramsArr['DurationSeconds'] = $finishTime->diffInSeconds($startTime);
                     $paramsArr['TaskComplete'] = true;
                     try{
-                        //$t = Task::updateOrCreate(['TaskName'=> $paramsArr['TaskName'], 'ServiceName' => $paramsArr['ServiceName']], $paramsArr);
-                        $t = Task::where('ServiceName', $paramsArr['ServiceName'])->where('ServiceName', $paramsArr['ServiceName'])->firstOrFail();
-                        $t->RecordsProcessed = $paramsArr['RecordsProcessed'];
-                        $t->TaskComplete = true;
-                        $t->DurationSeconds = $paramsArr['DurationSeconds'] ;
-                        $t->save();
-
+                        $t = Task::where('ServiceName',  '=' , $paramsArr['ServiceName'])->where('TaskName', '=' ,$paramsArr['TaskName'])->first();
+                        if(count($t) > 0){
+                            $t->RecordsProcessed = $paramsArr['RecordsProcessed'];
+                            $t->TaskComplete = true;
+                            $t->TaskLogId = $paramsArr['TaskLogId']; // since any of the tasks can complete first lets make sure we capture which one was the completed one
+                            $t->DurationSeconds = $paramsArr['DurationSeconds'];
+                            $t->save();
+                        }else{
+                            $result['result'] = true;
+                            $result['httpResponse'] = 404;
+                            $result['description'] = 'task not found';
+                        }
                     }catch(Exception $e){
+
                         $result['result'] = true;
                         $result['httpResponse'] = 404;
-                        $result['description'] = 'task not found'.$e->getMessage();
+                        $result['description'] = 'task log not found'.$e->getMessage();
                         CRLog("debug", "debug statement, ".$result['httpResponse'].", ".$result['description'].", ".$e->getMessage(), json_encode($result), __CLASS__, __FUNCTION__, __LINE__);
                     }
 
