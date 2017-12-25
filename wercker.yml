@@ -113,7 +113,7 @@ deploy-to-ecs-task-definition:
         region: $STEP_AWS_DEFAULT_REGION
         task-definition-name: crutils-metrics-geckoboard
         container-memory: 512
-        container_command: "[\"/usr/bin/php\",\"/var/www/laravel/artisan\", \"crutils:geckoboard:update\"]"
+        container_command: "[\"/usr/local/bin/php\",\"/var/www/html/artisan\", \"crutils:geckoboard:update\"]"
         task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
 
   after-steps:
