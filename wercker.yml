@@ -185,6 +185,6 @@ deploy-to-ecs-scheduled-task:
        schedule-description: "Tasks that need to run every 10 minutes like geckoboard dataset"
        cluster-name: ${STEP_CLUSTER}
        task-count: 1
-       task-definition-name: crutils-geckoboard
-       target-id: crutils-geckoboard
+       task-definition-name: crutils-metrics-geckoboard
+       target-id: crutils-metrics-geckoboard
        target-template: wercker/scheduled_task/ecs_task_target.json.template
