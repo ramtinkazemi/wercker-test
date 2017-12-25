@@ -111,7 +111,7 @@ deploy-to-ecs-task-definition:
         key: $STEP_AWS_ACCESS_KEY_ID
         secret: $STEP_AWS_SECRET_ACCESS_KEY
         region: $STEP_AWS_DEFAULT_REGION
-        task-definition-name: crutils-geckoboard
+        task-definition-name: crutils-metrics-geckoboard
         container-memory: 512
         container_command: "[\"/usr/bin/php\",\"/var/www/laravel/artisan\", \"crutils:geckoboard:update\"]"
         task_definition_template: wercker/task_definition/task_definition.json.template
