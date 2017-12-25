@@ -114,7 +114,7 @@ deploy-to-ecs-task-definition:
         task-definition-name: crutils-metrics-geckoboard
         container-memory: 512
         container_command: "[\"/usr/bin/php\",\"/var/www/laravel/artisan\", \"crutils:geckoboard:update\"]"
-        task_definition_template: wercker/task_definition/task_definition.json.template
+        task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
 
   after-steps:
       - install-packages:
