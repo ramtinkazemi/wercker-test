@@ -5,7 +5,6 @@
         "name": "php-fpm",
         "image": "quay.io/cashrewards/crutils-metrics:$WERCKER_GIT_BRANCH",
         "essential": true,
-        "command": ${STEP_DOCKER_COMMAND},
         "logConfiguration": {
           "logDriver": "awslogs",
           "options": {
