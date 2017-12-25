@@ -256,43 +256,6 @@
             "value": "${GECKOBOARD_POST}"
           }
         ]
-      },
-      {
-        "name": "nginx",
-        "image": "nginx",
-        "essential": true,
-        "logConfiguration": {
-          "logDriver": "awslogs",
-          "options": {
-            "awslogs-group": "/ec2-ms",
-            "awslogs-region": "ap-southeast-2",
-            "awslogs-stream-prefix": "${STEP_TASK_DEFINITION_NAME}-nginx"
-          }
-        },
-        "cpu": 0,
-        "memoryReservation": 256,
-        "links": [
-          "php-fpm"
-        ],
-        "volumesFrom": [
-          {
-            "sourceContainer": "php-fpm",
-            "readOnly": false
-          }
-        ],
-        "portMappings": [
-          {
-          "hostPort": 0,
-          "containerPort": 80,
-          "protocol": "tcp"
-          }
-        ],
-        "environment": [
-          {
-            "name": "_COMMIT_ID",
-            "value": "${WERCKER_GIT_COMMIT}"
-          }
-        ]
       }
     ]
 }
