@@ -86,7 +86,7 @@ push-to-quayio:
 
 #####
 #
-#   Register Task Definition
+#   Register Task Definition 
 #
 # For your Local test :
 #   wercker --environment ./wercker/.env.wercker.deploy deploy --pipeline deploy-to-ecs-task-definition
