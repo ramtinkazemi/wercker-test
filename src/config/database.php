@@ -39,6 +39,7 @@ return [
             'prefix' => '',
         ],
 
+        // database connectionf or crutils-metrics
         'mysql' => [
             'driver' => 'mysql',
             'host' => env('DB_HOST', '127.0.0.1'),
@@ -54,6 +55,7 @@ return [
             'engine' => null,
         ],
 
+        // this is the database connection to the crutils main app
         'crutils' => [
             'driver' => 'mysql',
             'host' => env('DB_HOST_crutils', '127.0.0.1'),
@@ -81,14 +83,14 @@ return [
             'schema' => 'public',
             'sslmode' => 'prefer',
         ],
-
+        // database connection to shopgo db
         'sqlsrv' => [
             'driver' => 'sqlsrv',
-            'host' => env('DB_HOST', 'localhost'),
-            'port' => env('DB_PORT', '1433'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => env('DB_HOST_shopgo', 'localhost'),
+            'port' => env('DB_PORT_shopgo', '1433'),
+            'database' => env('DB_DATABASE_shopgo', 'forge'),
+            'username' => env('DB_USERNAME_shopgo', 'forge'),
+            'password' => env('DB_PASSWORD_shopgo', ''),
             'charset' => 'utf8',
             'prefix' => '',
             // Customized

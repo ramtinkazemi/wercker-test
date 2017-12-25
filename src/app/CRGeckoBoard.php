@@ -45,7 +45,7 @@ class CRGeckoBoard
 
         // prepare the post data
         $postData['data'][] = $metricArr;
-        CRLog("debug", "post to geckoboard", print_r($postData), __CLASS__, __FUNCTION__, __LINE__);
+        CRLog("debug", "post to geckoboard", json_encode($postData, true), __CLASS__, __FUNCTION__, __LINE__);
 
         //send
         $postData = json_encode($postData, JSON_OBJECT_AS_ARRAY);
@@ -75,8 +75,8 @@ class CRGeckoBoard
      * Send the various batches
      */
     public function sendBatchSQL(){
-        $this->updateMemberDataSet();
-        $this->updateSystemDataSet();
+      //  $this->updateMemberDataSet();
+      //  $this->updateSystemDataSet();
         $this->updateReportSubscription();
     }
 
@@ -95,7 +95,7 @@ class CRGeckoBoard
 
         $sqlArr[] = ["sql" => "SELECT count(*) as total FROM Member as total WHERE DateJoined >= DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0);", "metricName" => "newmembers"];
         foreach($sqlArr as $key=>$value){
-            $rs = DB::select($value['sql']);
+            $rs = DB::connection('sqlsrv')->select($value['sql']);
             $tAtt[$value['metricName']] = 0+$rs[0]->total;
         }
         $this->send('member', $tAtt, '');
@@ -120,13 +120,13 @@ class CRGeckoBoard
         // SQL for report subscription
         $sqlArr[] = ["sql" => "SELECT count(*) as total FRom [dbo].[Transaction];", "metricName" => "totaltransactions"];
         foreach($sqlArr as $key=>$value){
-            $rs = DB::select($value['sql']);
+            $rs = DB::connection('sqlsrv')->select($value['sql']);
             $tAtt[$value['metricName']] = 0+$rs[0]->total;
         }
 
         // get Transaction breakdown @todo move to the transaction dataset
         $sqlTr = "SELECT count(*) as total, b.DescriptionShort, b.TransactionTypeId FROM [dbo].[Transaction] a, [dbo].[TransactionType] b WHERE a.TransactionTypeId = b.TransactionTypeId AND a.DateCreated >= DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) GROUP BY b.DescriptionShort, b.TransactionTypeId;";
-        $rsArr = DB::select($sqlTr);
+        $rsArr = DB::connection('sqlsrv')->select($sqlTr);
         foreach($rsArr as $key=>$rs){
             $promoTrs = [3,4,7];
             if(in_array($rs->TransactionTypeId, $promoTrs)){
@@ -148,10 +148,10 @@ class CRGeckoBoard
 
         $sqlArr[] = ["sql" => "SELECT count(*) as total FRom ReportSubscription;", "metricName" => "reportsubscriptionrows"];
         foreach($sqlArr as $key=>$value){
-            $rs = DB::select($value['sql']);
+            $rs = DB::connection('sqlsrv')->select($value['sql']);
             $tAtt[$value['metricName']] = 0+$rs[0]->total;
         }
-        $tAtt['reportsubscriptionelkcount'] = $this->est->getTotalAggResultsForQuery("+LastModifiedDate:[$timestamp TO $timestamp]", env('ES_REPORT_SUB_INDEX'), env('ES_REPORT_SUB_TYPE'));
+        $tAtt['reportsubscriptionelkcount'] = $this->est->getTotalAggResultsForQuery("+LastModifiedDate:[$timestamp TO $timestamp]", env('ES_REPORT_SUB_INDEX')."*", env('ES_REPORT_SUB_TYPE'));
 
         $this->send("reportsubscription", $tAtt,  $timestamp);
     }
