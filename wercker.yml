@@ -175,7 +175,7 @@ deploy-to-ecs-scheduled-task:
     # Scheduled task: every 10 minutes
     #####
     - steven-rho/aws-ecs-scheduled-task@0.0.4:
-       name: daily-every-10-minutes (crutils-geckoboard)
+       name: daily-every-10-minutes
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
