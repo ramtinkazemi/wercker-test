@@ -20,3 +20,5 @@ Route::get('/info', function () {
 });
 
 Route::resource('/tasklog', 'TaskLog');
+
+Route::resource('/metriclibrato', 'LibratoController');

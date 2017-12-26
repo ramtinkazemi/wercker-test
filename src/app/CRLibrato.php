@@ -7,15 +7,17 @@
  */
 
 namespace App;
-use DB;
 
 class CRLibrato
 {
 
-    public function __construct()
+    public $result;
+
+    public function __construct($metricName, $value, $app, $taskname, $tagArray)
     {
-
-
+       // echo "here ";die;
+        $this->result = $this->sendMetric($metricName, $value, $app, $taskname, $tagArray);
+        //return $this->result;
     }
 
     public function curl_exec($curl)
@@ -30,19 +32,26 @@ class CRLibrato
      * @param $metricName
      * @param $value
      * @param $tagArray
-     * @return bool
+     * @return array
      *
      * @todo move the api key to config
      */
-    public function sendMetric($metricName, $value, $tagArray){
-        $result = true;
+    public function sendMetric($metricName, $value, $app, $taskname, $tagArray){
+        $result = [];
+        $result['result'] = true;
+        $result['httpResponse'] = 200;
+        $result['message'] = 'OK';
+        $result['messageDetailed'] = '';
+       // print_r($result);die;
+
         $metricName = $this->getLibratoFriendlyMetric($metricName);
         $url      = env('LIBRATO_URL');
         $username = env('LIBRATO_USERNAME');
         $api_key  = env('LIBRATO_APIKEY');
 
         $tagArray['environment'] = env('APP_ENV'); //append the environment tag
-        $tagArray['app'] = 'CRutils'; //append the environment tag
+        $tagArray['app'] = $app; //append the app tag
+        $tagArray['taskname'] = $taskname; //append the app task name tag
 
         $curl = curl_init($url);
         $curl_post_data = array(
@@ -60,47 +69,29 @@ class CRLibrato
         curl_setopt($curl, CURLOPT_USERPWD, "$username:$api_key");
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
         ## Show the payload of the POST
-        if(env('APP_DEBUG')==true) {
-            //print_r($curl_post_data);
-            Log::debug(print_r($curl_post_data, true));
-        }
-        $result = $this->curl_exec($curl);
-        $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $curlinfo_total_time = curl_getinfo($curl, CURLINFO_TOTAL_TIME);
+        CRLog("debug", "curl post", json_encode($curl_post_data), __CLASS__, __FUNCTION__, __LINE__);
+
+        // get post details
+        $result['messageDetailed'] = $this->curl_exec($curl).", time taken  ".curl_getinfo($curl, CURLINFO_TOTAL_TIME);
+        $result['httpResponse'] = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
         curl_close($curl);
-        if(env('APP_DEBUG')==true) {
-            /*
-            color_dump ([
-                "HTTP Status Code" => $http_status,
-                "CURLINFO_TOTAL_TIME" => $curlinfo_total_time,
-                "Result" => $result
-            ]);
-            */
-            Log::debug(print_r([
-                "HTTP Status Code" => $http_status,
-                "CURLINFO_TOTAL_TIME" => $curlinfo_total_time,
-                "Result" => $result
-            ], true));
-            //echo "HTTP Status Code: " . $http_status . " CURLINFO_TOTAL_TIME: ". $curlinfo_total_time;
-            //echo $result;
+
+        CRLog("debug", "Librato send", json_encode([
+                "HTTP Status Code" => $result['httpResponse'],
+                "Result" => json_encode($result)
+            ]), __CLASS__, __FUNCTION__, __LINE__);
+
+        if($result['httpResponse'] != 202){
+            $result['result'] = false;
+            $result['message'] = "error with posting metric $metricName and value $value to Librato. ".$result['messageDetailed'];
         }
-        if($http_status != 202){
-            //echo "\n error with posting metric $metricName and value $value";
-            Log::debug("error with posting metric $metricName and value $value");
-            $result = false;
-        }
+       // print_r($result);die;
         return $result;
     }
 
-
-    /**
-     * Send a collection of data points to Librato
-     */
-    public function sentRegularMeasurements(){
-        $this->sendTransactionCounts();
-        return true;
-    }
 
     /**
      *
@@ -117,15 +108,5 @@ class CRLibrato
         return $metric;
     }
 
-    /**
-     * Sends the transaction counts
-     */
-    public function sendTransactionCounts(){
-        $sql = "SELECT count(*) as total from dbo.[Transaction];";
-        $results = DB::select($sql);
-        $resultarr = json_decode(json_encode($results),true);
-        $this->sendMetric('transaction count DB', $resultarr[0]['total'], array('class'=>'Librato'));
-        return true;
-    }
 
 }
