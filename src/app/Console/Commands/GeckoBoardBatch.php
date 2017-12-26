@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands; 
 
 use Illuminate\Console\Command;
 use App\CRGeckoBoard;
@@ -41,6 +41,6 @@ class GeckoBoardBatch extends Command
        // $taskId =  CRmetric(['ServiceName'=>'crutils', 'TaskName'=>$this->signature]);
         $gb = new CRGeckoBoard();
         $gb->sendBatchSQL();
-      //  $taskId =  CRmetric(['ServiceName'=>'crutils', 'TaskName'=>$this->signature, 'TaskLogId'=>$taskId, 'RecordsProcessed'=>1]);
+      //  $taskId =  CRmetric(['ServiceName'=I wil>'crutils', 'TaskName'=>$this->signature, 'TaskLogId'=>$taskId, 'RecordsProcessed'=>1]);
     }
 }
