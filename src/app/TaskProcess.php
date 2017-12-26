@@ -25,7 +25,7 @@ class TaskProcess
             $paramsArr['TaskComplete'] = false;
             $paramsArr['RecordsProcessed'] = 0;
             $paramsArr['DurationSeconds'] = 0;
-            $paramsArr['LastRunAT'] = Carbon::now()->toDateString();
+            $paramsArr['LastRunAT'] = Carbon::now()->toDateTimeString();
 
             $tl = TaskLog::create($paramsArr);
             $paramsArr['TaskLogId'] = $tl->id;
