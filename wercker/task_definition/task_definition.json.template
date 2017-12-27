@@ -270,6 +270,18 @@
           {
             "name": "GECKOBOARD_POST",
             "value": "${GECKOBOARD_POST}"
+          },
+          {
+          "name": "LIBRATO_URL",
+          "value": "${LIBRATO_URL}"
+          },
+          {
+          "name": "LIBRATO_USERNAME",
+          "value": "${LIBRATO_USERNAME}"
+          },
+          {
+          "name": "LIBRATO_APIKEY",
+          "value": "${LIBRATO_APIKEY}"
           }
         ]
       },
