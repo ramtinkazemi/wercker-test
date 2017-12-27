@@ -115,7 +115,7 @@ class CRGeckoBoard
         $tAtt['transactioncreated8'] = 0;
 
         //get total elk transactions
-        $tAtt['totaltransactionselk'] = $this->est->getTotalAggResultsForQuery('*', 'cr-db-transactions-approvals', 'cr-db-transactions-approvals');
+        $tAtt['totaltransactionselk'] = $this->est->getTotalAggResultsForQuery('*', 'cr-db-transactions-approvals*', 'cr-db-transactions-approvals');
 
         // SQL for report subscription
         $sqlArr[] = ["sql" => "SELECT count(*) as total FRom [dbo].[Transaction];", "metricName" => "totaltransactions"];
