@@ -66,14 +66,14 @@ class LibratoController extends Controller
         $result = [];
         if(is_array($params)){
 
-            if(array_key_exists('name', $params)
+            if(array_key_exists('taskname', $params)
                 && array_key_exists('value', $params) == true
                 && array_key_exists('app', $params)
                 && array_key_exists('metric', $params)){
                 $tags = array_key_exists('tags', $params)
                     ? $params['tags']
                     : [];
-                $l = new CRLibrato($params['metric'], $params['value'], $params['app'], $params['name'], $tags);
+                $l = new CRLibrato($params['metric'], $params['value'], $params['app'], $params['taskname'], $tags);
                 $result = $l->result;
 
             }else{ //missing valid payload
