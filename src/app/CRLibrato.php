@@ -49,9 +49,21 @@ class CRLibrato
         $username = env('LIBRATO_USERNAME');
         $api_key  = env('LIBRATO_APIKEY');
 
-        $tagArray['environment'] = env('APP_ENV'); //append the environment tag
-        $tagArray['app'] = $app; //append the app tag
-        $tagArray['taskname'] = $taskname; //append the app task name tag
+        $tagArray['environment'] = $this->getLibratoFriendlyMetric(env('APP_ENV')); //append the environment tag
+        $tagArray['app'] = $this->getLibratoFriendlyMetric($app); //append the app tag
+        $tagArray['taskname'] = $this->getLibratoFriendlyMetric($taskname); //append the app task name tag
+
+        // prep the values to make librato friendly
+
+        foreach($tagArray as $tempkey => $tempValue){
+            if(is_string($tempkey)){
+                unset($tagArray[$tempkey]);
+                $tagArray[$this->getLibratoFriendlyMetric($tempkey)] = $tempValue;
+            }
+            if(is_string($tempValue)){
+                $tagArray[$tempkey] = $this->getLibratoFriendlyMetric($tempValue);
+            }
+        }
 
         $curl = curl_init($url);
         $curl_post_data = array(
@@ -59,6 +71,8 @@ class CRLibrato
                 array("name" => $metricName, "value" => $value, "tags" => $tagArray)
             )
         );
+
+
 
         $headers = array(
             'Content-Type: application/json'
@@ -69,6 +83,7 @@ class CRLibrato
         curl_setopt($curl, CURLOPT_USERPWD, "$username:$api_key");
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
 
         ## Show the payload of the POST
         CRLog("debug", "curl post", json_encode($curl_post_data), __CLASS__, __FUNCTION__, __LINE__);
@@ -81,7 +96,7 @@ class CRLibrato
 
         CRLog("debug", "Librato send", json_encode([
                 "HTTP Status Code" => $result['httpResponse'],
-                "Result" => json_encode($result)
+                "Result" => $result
             ]), __CLASS__, __FUNCTION__, __LINE__);
 
         if($result['httpResponse'] != 202){
@@ -97,6 +112,13 @@ class CRLibrato
      *
      * Need to make sure that the metric follows librato convention
      *
+     *
+     * Librato doc https://www.librato.com/docs/api/#create-a-measurement
+     *
+     * Metric names must be 255 or fewer characters, and may only consist of A-Za-z0-9.:-_. The metric namespace is case insensitive.
+     * Tag names must match the regular expression /\A[-.:_\w]{1,64}\z/. Tag names are always converted to lower case.
+     * Tag values must match the regular expression /\A[-.:_\\\/\w ]{1,255}\z/. Tag values are always converted to lower case.
+     *
      * @param $metric
      * @return mixed
      */
@@ -105,6 +127,7 @@ class CRLibrato
         $metric = str_replace('(', '_', $metric);
         $metric = str_replace(')', '_', $metric);
         $metric = str_replace('$', 'AUD', $metric);
+        $metric = str_replace('&', 'and', $metric);
         return $metric;
     }
 
