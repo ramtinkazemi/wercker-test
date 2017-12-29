@@ -159,3 +159,41 @@ if (! function_exists('getColourString')) {
     }
 }
 
+
+/**
+ * @param $params array $params['data'][] = array('Date' => '20130320', 'Users' => '1')
+ *                      $params['onduplicate'] = array('Users' => 'replace')
+ *                      $params['color'] = array('Users' => '#52ff7f')
+ *                      $params['type'] = array('Users' => 'line');
+ *                      $params['endpoint'] example https://app.cyfe.com/api/push/5a46105ae0e663525741213915974
+ *
+ * docuentation https://www.cyfe.com/api for push
+ */
+if (! function_exists('sendToCyfe')) {
+    function sendToCyfe($params, $endpoint)
+    {
+        /*
+        $endpoint = '.../api/push/5151e3ec53783701321099125233'; //https://app.cyfe.com/api/push/5a46105ae0e663525741213915974
+        $data = array();
+        $data['data'][] = array('Date' => '20130320', 'Users' => '1');
+        $data['onduplicate'] = array('Users' => 'replace');
+        $data['color'] = array('Users' => '#52ff7f');
+        $data['type'] = array('Users' => 'line');
+        */
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $endpoint);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $output = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if (stripos($status, '200') !== false)
+            CRLog("debug", "success posting to Cyfe", "", __CLASS__, __FUNCTION__, __LINE__);
+        else
+            CRLog("error", "error posting to Cyfe", "", __CLASS__, __FUNCTION__, __LINE__);
+    }
+}
+

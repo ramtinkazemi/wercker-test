@@ -121,6 +121,7 @@ class LibratoController extends Controller
         return response()->json($this->samplePayload, $this->samplePayload['httpResponse']);
     }
 
+
     /**
      * Remove the specified resource from storage.
      *
