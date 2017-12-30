@@ -80,6 +80,7 @@ class CRGeckoBoard
         $this->updateMemberDataSet();
         $this->updateSystemDataSet();
         $this->updateReportSubscription();
+        $this->updateTransactionTotals();
     }
 
     /**
@@ -139,8 +140,6 @@ class CRGeckoBoard
         $tAtt['transactioncreated6'] = 0;
         $tAtt['transactioncreated8'] = 0;
 
-
-
         // get Transaction breakdown @todo move to the transaction dataset
         $sqlTr = "SELECT count(*) as total, b.DescriptionShort, b.TransactionTypeId FROM [dbo].[Transaction] a, [dbo].[TransactionType] b WHERE a.TransactionTypeId = b.TransactionTypeId AND a.DateCreated >= DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) GROUP BY b.DescriptionShort, b.TransactionTypeId;";
         $rsArr = DB::connection('sqlsrv')->select($sqlTr);
@@ -155,15 +154,21 @@ class CRGeckoBoard
         }
 
         // send to cyfe transactions
-        $params['onduplicate'] = [];
-        foreach($tAtt as $key=>$value){
-            $params['onduplicate'][$key] = 'replace';
-        }
-
+        $params['onduplicate'] = [
+            'transactioncreated347' => 'replace',
+            'transactioncreated1' => 'replace',
+            'transactioncreated2' => 'replace',
+            'transactioncreated5' => 'replace',
+            'transactioncreated6' => 'replace',
+            'transactioncreated8' => 'replace',
+        ];
         $params['data'][] = $tAtt;
         sendToCyfe($params, "https://app.cyfe.com/api/push/5a46239ca54e40217215493916031");
 
+        CRLog("debug", "update system dataSet complete", "", __CLASS__, __FUNCTION__, __LINE__);
+    }
 
+    public function updateTransactionTotals(){
         //send to cyfe transaction totals
         // SQL for total transcations
         $rs = DB::connection('sqlsrv')->select("SELECT count(*) as total FRom [dbo].[Transaction];");
@@ -171,14 +176,11 @@ class CRGeckoBoard
         $total['totaltransactions'] =  0+$rs[0]->total;
         $total['totaltransactionselk'] = $this->est->getTotalAggResultsForQuery('*', 'cr-db-transactions-approvals*', 'cr-db-transactions-approvals');
         $params = [];
-        $params['onduplicate'] = [];
-        foreach($total as $key=>$value){
-            $params['onduplicate'][$key] = 'replace';
-        }
+        $params['onduplicate'] = ['totaltransactions' => 'replace', 'totaltransactionselk' => 'replace'];
         $params['data'][] = $total;
         sendToCyfe($params, "https://app.cyfe.com/api/push/5a4622bee0d226316695233916029");
+        CRLog("debug", "update transactions totals complete", "", __CLASS__, __FUNCTION__, __LINE__);
 
-        CRLog("debug", "update system dataSet complete", "", __CLASS__, __FUNCTION__, __LINE__);
     }
 
     /**
@@ -192,10 +194,8 @@ class CRGeckoBoard
         $total['DB report subscription'] = 0+$rs[0]->total;
 
         $params = [];
-        $params['onduplicate'] = [];
-        foreach($total as $key=>$value){
-            $params['onduplicate'][$key] = 'replace';
-        }
+        $params['onduplicate'] = ['ELK report subscription' => 'replace', 'DB report subscription' => 'replace'];
+
         $params['data'][] = $total;
         sendToCyfe($params, "https://app.cyfe.com/api/push/5a46244f550fc2293781123916033");
     }
