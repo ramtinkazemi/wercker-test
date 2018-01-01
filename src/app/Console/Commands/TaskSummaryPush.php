@@ -12,14 +12,14 @@ class TaskSummaryPush extends Command
      *
      * @var string
      */
-    protected $signature = 'crutils:tasks:summary:push';
+    protected $signature = 'crutils:tasks:summary:push {service-name}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Sends the task summary to the dashboard platform';
+    protected $description = 'Sends the task summary to the dashboard platform, expects the service name as argument';
 
     /**
      * Create a new command instance.
@@ -38,6 +38,6 @@ class TaskSummaryPush extends Command
      */
     public function handle()
     {
-        $ts = new TaskReport('crutils');
+        $ts = new TaskReport($this->argument('service-name'));
     }
 }

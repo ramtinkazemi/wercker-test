@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use DB;
 use App\MemberRisk;
 use App\EsTransaction;
+use App\TaskReport;
 
 
 class CRGeckoBoard
@@ -29,8 +30,12 @@ class CRGeckoBoard
         $this->endPointDBELKTransactions = env('CYFE_endPointDBELKTransactions', '');
         $this->endPointTransactionsByType = env('CYFE_endPointTransactionsByType', '');
         $this->endPointMemberRisk = env('CYFE_endPointMemberRisk', '');
-
         $this->est = new EsTransaction();
+
+        //create the csv files for task logs
+        $tr = new TaskReport("crutils");
+        $tr = new TaskReport("Transaction-DTI");
+        $tr = new TaskReport("Content-DTI");
     }
 
     /**

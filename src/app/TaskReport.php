@@ -24,6 +24,7 @@ class TaskReport
     public $csv;
 
     public function __Construct($service){
+        CRLog("debug", "update CYFE $service", "", __CLASS__, __FUNCTION__, __LINE__);
         $this->result = [];
         $this->service = $service;
         $this->getToday();
@@ -31,23 +32,24 @@ class TaskReport
         $this->getLastSevenDays();
         $this->addMissingKeys();
         $this->csv = $this->getCSV();
+        $this->saveS3();
     }
 
     private function getToday(){
-        $sql = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at >= CURRENT_DATE() AND TaskComplete = 1 GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
+        $sql = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at >= CURRENT_DATE() AND TaskComplete = 1 AND ServiceName = '".$this->service."' GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
         $rs = DB::SELECT($sql);
         $this->result['today'] = $this->getArray($rs);
         //print_r($this->result);
     }
 
     private function getPreviousDay(){
-        $sql = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at >= CURRENT_DATE()-1 AND created_at < CURRENT_DATE() AND TaskComplete = 1 GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
+        $sql = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at >= CURRENT_DATE()-1 AND created_at < CURRENT_DATE() AND TaskComplete = 1 AND ServiceName =  '".$this->service."' GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
         $rs = DB::SELECT($sql);
         $this->result['yesterday'] = $this->getArray($rs);
     }
 
     private function getLastSevenDays(){
-        $sql = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at >= CURRENT_DATE()-7  AND TaskComplete = 1 GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
+        $sql = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at >= CURRENT_DATE()-7  AND TaskComplete = 1 AND ServiceName =  '".$this->service."' GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
         $rs = DB::SELECT($sql);
         $this->result['last-seven-days'] = $this->getArray($rs);
     }
@@ -145,9 +147,10 @@ class TaskReport
         return implode("\n", $csv);
     }
 
-    private function saveToS3(){
-        Storage::disk('s3')->put($this->logPath, $this->logMessage);
+    /**
+     * save file to S3
+     */
+    private function saveS3(){
+        Storage::disk('s3')->put("cyfe/".$this->service.".csv", $this->csv);
     }
-
-
 }
