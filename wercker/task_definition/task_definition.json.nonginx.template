@@ -284,6 +284,23 @@
           "name": "LIBRATO_APIKEY",
           "value": "${LIBRATO_APIKEY}"
           }
+          ,
+          {
+          "name": "CYFE_endPointreportSubscription",
+          "value": "${CYFE_endPointreportSubscription}"
+          },
+          {
+          "name": "CYFE_endPointDBELKTransactions",
+          "value": "${CYFE_endPointDBELKTransactions}"
+          },
+          {
+          "name": "CYFE_endPointTransactionsByType",
+          "value": "${CYFE_endPointTransactionsByType}"
+          },
+          {
+          "name": "CYFE_endPointMemberRisk",
+          "value": "${CYFE_endPointMemberRisk}"
+          }
         ]
       }
     ]
