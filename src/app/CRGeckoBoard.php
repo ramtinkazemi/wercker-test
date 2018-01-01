@@ -18,9 +18,18 @@ use App\EsTransaction;
 class CRGeckoBoard
 {
     public $est; //EsTransaction instance
+    public $endPointreportSubscription;
+    public $endPointDBELKTransactions;
+    public $endPointTransactionsByType;
+    public $endPointMemberRisk;
 
     public function __construct()
     {
+        $this->endPointreportSubscription = env('CYFE_endPointreportSubscription', '');
+        $this->endPointDBELKTransactions = env('CYFE_endPointDBELKTransactions', '');
+        $this->endPointTransactionsByType = env('CYFE_endPointTransactionsByType', '');
+        $this->endPointMemberRisk = env('CYFE_endPointMemberRisk', '');
+
         $this->est = new EsTransaction();
     }
 
@@ -120,7 +129,7 @@ class CRGeckoBoard
         $params['onduplicate'] = $this->getArraySettings($widgetHeaders, 1, "replace", "onduplicate");
         $params['cumulative'] = $this->getArraySettings($widgetHeaders, 1, "replace", "cumulative");
 
-        sendToCyfe($params, "https://app.cyfe.com/api/push/5a46105ae0e663525741213915974");
+        sendToCyfe($params, $this->endPointMemberRisk);
 
         CRLog("debug", "update Member dataSet complete", "", __CLASS__, __FUNCTION__, __LINE__);
     }
@@ -154,13 +163,12 @@ class CRGeckoBoard
             }else{
                 $tAtt["transactioncreated".$rs->TransactionTypeId] = 0+$rs->total;
             }
-
         }
         // send to cyfe transactions
         $params['data'][] = $tAtt;
         $params['onduplicate'] = $this->getArraySettings($widgetHeaders, 1, "replace", "onduplicate");
         $params['cumulative'] = $this->getArraySettings($widgetHeaders, 1, "replace", "cumulative");
-        sendToCyfe($params, "https://app.cyfe.com/api/push/5a46239ca54e40217215493916031");
+        sendToCyfe($params, $this->endPointTransactionsByType);
         CRLog("debug", "update system dataSet complete", "", __CLASS__, __FUNCTION__, __LINE__);
     }
 
@@ -181,7 +189,7 @@ class CRGeckoBoard
         $params['onduplicate'] = $this->getArraySettings($widgetHeaders, 1, "replace", "onduplicate");
         $params['cumulative'] = $this->getArraySettings($widgetHeaders, 1, "replace", "cumulative");
 
-        sendToCyfe($params, "https://app.cyfe.com/api/push/5a4622bee0d226316695233916029");
+        sendToCyfe($params, $this->endPointDBELKTransactions);
         CRLog("debug", "update transactions totals complete", "", __CLASS__, __FUNCTION__, __LINE__);
 
     }
@@ -206,7 +214,13 @@ class CRGeckoBoard
         $params['onduplicate'] = $this->getArraySettings($widgetHeaders, 1, "replace", "onduplicate");
         $params['cumulative'] = $this->getArraySettings($widgetHeaders, 1, "replace", "cumulative");
 
-        sendToCyfe($params, "https://app.cyfe.com/api/push/5a46244f550fc2293781123916033");
+        sendToCyfe($params, $this->endPointreportSubscription);
+    }
+
+    public function updateTaskLog(){
+        $services = ["crutils", "Transaction-DTI", ""]; //we only push selected services
+        $sql  = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at > CURRENT_DATE() GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
+
     }
 
 }
