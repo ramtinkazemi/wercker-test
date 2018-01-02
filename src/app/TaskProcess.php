@@ -32,6 +32,10 @@ class TaskProcess
 
             $t = Task::updateOrCreate(['TaskName'=> $paramsArr['TaskName'], 'ServiceName' => $paramsArr['ServiceName']], $paramsArr);
 
+            //add key to task log
+            $tl->TaskId = $t->id;
+            $tl->save();
+
             //update the result
             $result['result'] = true;
             $result['TaskLogId'] = $tl->id;
@@ -39,6 +43,8 @@ class TaskProcess
             $result['ServiceName'] = $tl->ServiceName;
             $result['TaskName'] = $tl->TaskName;
             $result['description'] = 'task created';
+
+
         }else{
 
             //check if this task is already completed
@@ -63,6 +69,7 @@ class TaskProcess
                             $t->TaskLogId = $paramsArr['TaskLogId']; // since any of the tasks can complete first lets make sure we capture which one was the completed one
                             $t->DurationSeconds = $paramsArr['DurationSeconds'];
                             $t->save();
+                            $paramsArr['TaskId'] = $t->id;
                         }else{
                             $result['result'] = true;
                             $result['httpResponse'] = 404;

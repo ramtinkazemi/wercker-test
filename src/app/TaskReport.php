@@ -22,48 +22,44 @@ class TaskReport
     public $service;
     public $result;
     public $csv;
+    public $allTasksForService; // array of all tasks of service in Task Table
 
     public function __Construct($service){
         CRLog("debug", "update CYFE $service", "", __CLASS__, __FUNCTION__, __LINE__);
+        $this->allTasksForService = [];
+
         $this->result = [];
         $this->service = $service;
-        $this->getToday();
-        $this->getPreviousDay();
-        $this->getLastSevenDays();
+        $this->getAllTasksForService();
+        $this->getAllExecutions();
         $this->addMissingKeys();
         $this->csv = $this->getCSV();
         $this->saveS3();
     }
 
-    private function getToday(){
-        $sql = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at >= CURRENT_DATE() AND TaskComplete = 1 AND ServiceName = '".$this->service."' GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
-        $rs = DB::SELECT($sql);
-        $this->result['today'] = $this->getArray($rs);
-        //print_r($this->result);
-    }
-
-    private function getPreviousDay(){
-        $sql = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at >= CURRENT_DATE()-1 AND created_at < CURRENT_DATE() AND TaskComplete = 1 AND ServiceName =  '".$this->service."' GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
-        $rs = DB::SELECT($sql);
-        $this->result['yesterday'] = $this->getArray($rs);
-    }
-
-    private function getLastSevenDays(){
-        $sql = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at >= CURRENT_DATE()-7  AND TaskComplete = 1 AND ServiceName =  '".$this->service."' GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
-        $rs = DB::SELECT($sql);
-        $this->result['last-seven-days'] = $this->getArray($rs);
-    }
-
-    private function deleteOver7days(){
-
-    }
-
-    private function getArray($object){
+    private function getExecutionsForDays($daysBack){
         $result = [];
-        foreach($object as $key=>$serviceTask){
-            $result[$serviceTask->ServiceName.'-'.$serviceTask->TaskName] = json_decode(json_encode($serviceTask), true);
+        foreach($this->allTasksForService as $taskKey=>$task){
+            $result[$taskKey] = ['task-1' => 0, 'task-0' => 0];
+            $sql = "SELECT TaskComplete, count(*) as total FROM TaskLog Where TaskId = ".$task['id']." AND created_at >= CURRENT_DATE() -$daysBack GROUP BY TaskComplete;";
+            $rs = DB::SELECT($sql);
+            foreach($rs as $key=>$value){
+                $result[$taskKey]['task-'.$value->TaskComplete] = $value->total;
+            }
+            $result[$taskKey]['total'] = $result[$taskKey]['task-1'] + $result[$taskKey]['task-0'];
         }
         return $result;
+    }
+
+    private function getAllExecutions(){
+        $days = ['today'=>0, 'yesterday'=>1, 'last-seven-days'=>7];
+        foreach($days as $description=>$daysBack){
+            $this->result[$description] = $this->getExecutionsForDays($daysBack);
+        }
+    }
+
+    private function deleteOver7days(){ //@todo
+
     }
 
     /**
@@ -105,52 +101,81 @@ class TaskReport
      * @return mixed
      */
     private function getBlankTask($task){
-        $task['Executions'] = 0;
-        $task['AverageDuration'] = 0;
-        $task['RecordsProcessed'] = 0;
-        $task['TaskComplete'] = 0;
+        $task['total'] = 0;
+        $task['task-1'] = 0;
+        $task['task-0'] = 0;
         return $task;
     }
 
+
+    /**
+     *
+     * produce csv files (all, incomplete or no complete yesterday, incomplete or no complete in last seven days
+     *
+     * @return array
+     */
     private function getCSV(){
         $arr[] = [
             'Task name',
-            'Executions today',
-            'AVG duration today',
-            'Records processed today',
-            'Executions yesterday',
-            'AVG duration yesterday',
-            'Records processed yesterday',
-            'Executions last 7 days',
-            'AVG duration last 7 days',
-            'Records processed last 7 days',
-            'Incomplete tasks last 7 days',
+            'Today total',
+            'Today complete',
+            'Today incomplete',
+            'yesterday total',
+            'yesterday complete',
+            'yesterday incomplete',
+            '7 days total',
+            '7 days complete',
+            '7 daysincomplete',
         ];
         foreach($this->result['last-seven-days'] as $key=>$task){
             $arr[] = [$key,
-                $this->result['today'][$key]['Executions'],
-                $this->result['today'][$key]['AverageDuration'],
-                $this->result['today'][$key]['RecordsProcessed'],
-                $this->result['yesterday'][$key]['Executions'],
-                $this->result['yesterday'][$key]['AverageDuration'],
-                $this->result['yesterday'][$key]['RecordsProcessed'],
-                $this->result['last-seven-days'][$key]['Executions'],
-                $this->result['last-seven-days'][$key]['AverageDuration'],
-                $this->result['last-seven-days'][$key]['RecordsProcessed'],
-                0 //@todo  incompete tasks
+                $this->result['today'][$key]['total'],
+                $this->result['today'][$key]['task-1'],
+                $this->result['today'][$key]['task-0'],
+                $this->result['yesterday'][$key]['total'],
+                $this->result['yesterday'][$key]['task-1'],
+                $this->result['yesterday'][$key]['task-0'],
+                $this->result['last-seven-days'][$key]['total'],
+                $this->result['last-seven-days'][$key]['task-1'],
+                $this->result['last-seven-days'][$key]['task-0'],
             ];
         }
-        $csv = [];
+        $csv = ['all' => [], 'incomplete-today'=>[], 'incomplete-yesterday' => [], 'incomplete-last-seven-days' => []];
+
         foreach($arr as $key=>$line){
-            $csv[] = implode(",", $line);
+            $csv['all'][] = implode(",", $line);
+            if($line[4] != $line[6] || $line[5] == 0){ // incomplete or no complete yesterday
+                $csv['incomplete-yesterday'][] = implode(",", $line);
+            }
+            if($line[7] != $line[9] || $line[8] == 0){ // incomplete or no complete in last seven days
+                $csv['incomplete-last-seven-days'][] = implode(",", $line);
+            }
+            if($line[1] == 0 || $line[2] == 0){ // no executions or no complete in last seven days
+                $csv['incomplete-today'][] = implode(",", $line);
+            }
         }
-        return implode("\n", $csv);
+        //get each array in csv format
+        foreach($csv as $key=>$value){
+            $csv[$key] = implode("\n",$csv[$key]);
+        }
+        return $csv;
     }
 
     /**
      * save file to S3
      */
     private function saveS3(){
-        Storage::disk('s3')->put("cyfe/".$this->service.".csv", $this->csv);
+        $csv = ['all', 'incomplete-today', 'incomplete-yesterday', 'incomplete-last-seven-days'];
+        foreach($csv as $csvType){
+            Storage::disk('s3')->put("cyfe/".$this->service."-$csvType.csv", $this->csv[$csvType]);
+        }
+    }
+
+    private function getAllTasksForService(){
+        $sql = "Select * FROM Task Where ServiceName = '".$this->service."'";
+        $rs = DB::SELECT($sql);
+        foreach($rs as $key=>$value){
+            $this->allTasksForService[$value->ServiceName."-".$value->TaskName]['id'] = $value->id;
+        }
     }
 }
