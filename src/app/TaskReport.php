@@ -75,7 +75,7 @@ class TaskReport
      * delete old records
      */
     private function deleteOver7days(){ //@todo
-        $deletedRows = TaskLog::where('created_at', '>', Carbon::now()->subDays(8))->delete();
+        $deletedRows = TaskLog::where('created_at', '<', Carbon::now()->subDays(8))->delete();
     }
 
     /**
@@ -144,29 +144,30 @@ class TaskReport
             '7 daysincomplete',
         ];
         foreach($this->result['last-seven-days'] as $key=>$task){
-            $arr[] = [$key,
-                $this->result['today'][$key]['total'],
-                $this->result['today'][$key]['task-1'],
-                $this->result['today'][$key]['task-0'],
-                $this->result['yesterday'][$key]['total'],
-                $this->result['yesterday'][$key]['task-1'],
-                $this->result['yesterday'][$key]['task-0'],
-                $this->result['last-seven-days'][$key]['total'],
-                $this->result['last-seven-days'][$key]['task-1'],
-                $this->result['last-seven-days'][$key]['task-0'],
+            $arr[] = [
+                $key,                                           // 0
+                $this->result['today'][$key]['total'],          // 1
+                $this->result['today'][$key]['task-1'],         // 2
+                $this->result['today'][$key]['task-0'],         // 3
+                $this->result['yesterday'][$key]['total'],      // 4
+                $this->result['yesterday'][$key]['task-1'],     // 5
+                $this->result['yesterday'][$key]['task-0'],     // 6
+                $this->result['last-seven-days'][$key]['total'], //7
+                $this->result['last-seven-days'][$key]['task-1'],//8
+                $this->result['last-seven-days'][$key]['task-0'],//9
             ];
         }
         $csv = ['all' => [], 'incomplete-today'=>[], 'incomplete-yesterday' => [], 'incomplete-last-seven-days' => []];
 
         foreach($arr as $key=>$line){
             $csv['all'][] = implode(",", $line);
-            if($line[4] != $line[5] || $line[4] == 0){ // incomplete or no complete yesterday
+            if($line[4] != $line[5] || $line[4] == 0){ // incomplete or no executions yesterday
                 $csv['incomplete-yesterday'][] = implode(",", $line);
             }
             if($line[7] != $line[8] || $line[7] == 0){ // incomplete or no complete in last seven days
                 $csv['incomplete-last-seven-days'][] = implode(",", $line);
             }
-            if($line[7] == 0 || $line[8] == 0){ // no executions or no complete in last seven days
+            if($line[1] == 0){ // no executions or no complete in last seven days
                 $csv['incomplete-today'][] = implode(",", $line);
             }
         }

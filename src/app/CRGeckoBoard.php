@@ -33,9 +33,10 @@ class CRGeckoBoard
         $this->est = new EsTransaction();
 
         //create the csv files for task logs
-        $tr = new TaskReport("crutils");
-        $tr = new TaskReport("Transaction-DTI");
-        $tr = new TaskReport("Content-DTI");
+        $services = ['crutils', 'Transaction-DTI', 'Content-DTI'];
+        foreach($services as $service){
+            $tr = new TaskReport($service);
+        }
     }
 
     /**
