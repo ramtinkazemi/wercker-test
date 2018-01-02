@@ -54,7 +54,7 @@ class CRGeckoBoard
             $dataSet = "system";
         }
         if($timestamp == ""){ //set timestamp to now if not set
-            $timestamp =  Carbon::now()->format('Y-m-d'); //Carbon::now()->format('Y-m-d') ; // $carbon = new Carbon()->format('Y-m-d H'))->toda;
+            $timestamp =  Carbon::now()->format('Y-m-d');
 
         }
         $metricArr['timestamp'] = $timestamp;

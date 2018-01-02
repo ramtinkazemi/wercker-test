@@ -9,6 +9,8 @@
 namespace App;
 use DB;
 use Illuminate\Support\Facades\Storage;
+use App\TaskLog;
+use Carbon\Carbon;
 
 /**
  * Class TaskReport
@@ -35,8 +37,16 @@ class TaskReport
         $this->addMissingKeys();
         $this->csv = $this->getCSV();
         $this->saveS3();
+        $this->deleteOver7days();
     }
 
+    /**
+     *
+     * get the execution for a number of days back
+     *
+     * @param $daysBack
+     * @return array
+     */
     private function getExecutionsForDays($daysBack){
         $result = [];
         foreach($this->allTasksForService as $taskKey=>$task){
@@ -51,6 +61,9 @@ class TaskReport
         return $result;
     }
 
+    /**
+     * gets all executions for the date ranges of interest
+     */
     private function getAllExecutions(){
         $days = ['today'=>0, 'yesterday'=>1, 'last-seven-days'=>7];
         foreach($days as $description=>$daysBack){
@@ -58,8 +71,11 @@ class TaskReport
         }
     }
 
+    /**
+     * delete old records
+     */
     private function deleteOver7days(){ //@todo
-
+        $deletedRows = TaskLog::where('created_at', '>', Carbon::now()->subDays(8))->delete();
     }
 
     /**
@@ -144,13 +160,13 @@ class TaskReport
 
         foreach($arr as $key=>$line){
             $csv['all'][] = implode(",", $line);
-            if($line[4] != $line[6] || $line[5] == 0){ // incomplete or no complete yesterday
+            if($line[4] != $line[5] || $line[4] == 0){ // incomplete or no complete yesterday
                 $csv['incomplete-yesterday'][] = implode(",", $line);
             }
-            if($line[7] != $line[9] || $line[8] == 0){ // incomplete or no complete in last seven days
+            if($line[7] != $line[8] || $line[7] == 0){ // incomplete or no complete in last seven days
                 $csv['incomplete-last-seven-days'][] = implode(",", $line);
             }
-            if($line[1] == 0 || $line[2] == 0){ // no executions or no complete in last seven days
+            if($line[7] == 0 || $line[8] == 0){ // no executions or no complete in last seven days
                 $csv['incomplete-today'][] = implode(",", $line);
             }
         }
