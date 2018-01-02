@@ -149,7 +149,7 @@ class TaskReport
             $serviceArr = explode("@@@", $key);
            // $key = str_replace($key, "@@@", ":");
             $arr[] = [
-                str_replace($key, "@@@", "-"),   // 0
+                str_replace("@@@", "-", $key),   // 0
                 $this->result['today'][$key]['total'],          // 1
                 $this->result['today'][$key]['task-1'],         // 2
                 $this->result['today'][$key]['task-0'],         // 3
@@ -182,6 +182,12 @@ class TaskReport
         return $csv;
     }
 
+    /**
+     *
+     * get csv summary for tasks complete/incomplete
+     *
+     * @return array
+     */
     private function getCSVSummary(){
         $arrKeys = [
             'Complete',
@@ -204,7 +210,6 @@ class TaskReport
                         ($task['task-0'] + $arr[$period][$serviceArr[0]][1]),
                     ];
             }
-
         }
 
         $lines = [];
@@ -232,6 +237,9 @@ class TaskReport
         }
     }
 
+    /**
+     * returns all tasks for all services regardless of recent tasks
+     */
     private function getAllTasksForService(){
         $sql = "Select * FROM Task Where ServiceName = '".$this->service."'";
         $rs = DB::SELECT($sql);
