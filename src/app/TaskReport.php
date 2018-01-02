@@ -49,11 +49,19 @@ class TaskReport
      * @param $daysBack
      * @return array
      */
-    private function getExecutionsForDays($daysBack){
+    private function getExecutionsForDays($daysBack)
+    {
+        if ($daysBack == 1) { //yesterday
+            $daysBack = "AND created_at < CURRENT_DATE() AND created_at >= CURRENT_DATE() -$daysBack ";
+        }elseif($daysBack == 0) {
+            $daysBack = "";
+        }else{ //today and last seven days
+          $daysBack = "AND created_at >= CURRENT_DATE() -$daysBack";
+        }
         $result = [];
         foreach($this->allTasksForService as $taskKey=>$task){
             $result[$taskKey] = ['task-1' => 0, 'task-0' => 0];
-            $sql = "SELECT TaskComplete, count(*) as total FROM TaskLog Where TaskId = ".$task['id']." AND created_at >= CURRENT_DATE() -$daysBack GROUP BY TaskComplete;";
+            $sql = "SELECT TaskComplete, count(*) as total FROM TaskLog Where TaskId = ".$task['id']." $daysBack GROUP BY TaskComplete;";
             $rs = DB::SELECT($sql);
             foreach($rs as $key=>$value){
                 $result[$taskKey]['task-'.$value->TaskComplete] = $value->total;
