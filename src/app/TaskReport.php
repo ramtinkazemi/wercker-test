@@ -25,6 +25,7 @@ class TaskReport
     public $result;
     public $csv;
     public $allTasksForService; // array of all tasks of service in Task Table
+    public $csvSummary; // Service task summary
 
     public function __Construct($service){
         CRLog("debug", "update CYFE $service", "", __CLASS__, __FUNCTION__, __LINE__);
@@ -36,6 +37,7 @@ class TaskReport
         $this->getAllExecutions();
         $this->addMissingKeys();
         $this->csv = $this->getCSV();
+        $this->csvSummary = $this->getCSVSummary();
         $this->saveS3();
         $this->deleteOver7days();
     }
@@ -74,7 +76,7 @@ class TaskReport
     /**
      * delete old records
      */
-    private function deleteOver7days(){ //@todo
+    private function deleteOver7days(){
         $deletedRows = TaskLog::where('created_at', '<', Carbon::now()->subDays(8))->delete();
     }
 
@@ -144,8 +146,10 @@ class TaskReport
             '7 daysincomplete',
         ];
         foreach($this->result['last-seven-days'] as $key=>$task){
+            $serviceArr = explode("@@@", $key);
+           // $key = str_replace($key, "@@@", ":");
             $arr[] = [
-                $key,                                           // 0
+                str_replace($key, "@@@", "-"),   // 0
                 $this->result['today'][$key]['total'],          // 1
                 $this->result['today'][$key]['task-1'],         // 2
                 $this->result['today'][$key]['task-0'],         // 3
@@ -178,6 +182,42 @@ class TaskReport
         return $csv;
     }
 
+    private function getCSVSummary(){
+        $arrKeys = [
+            'Complete',
+            'Incomplete',
+        ];
+
+        $csvPeriods = ['today',  'yesterday', 'last-seven-days'];
+
+        foreach($csvPeriods as $period){
+            //$arr = [];
+            $arr[$period][] = $arrKeys;
+            foreach($this->result[$period] as $key=>$task){
+                $serviceArr = explode("@@@", $key);
+                if(!array_key_exists($key, $arr[$period])){ //add zero values if new row
+                    $arr[$period][$serviceArr[0]][] = 0;
+                    $arr[$period][$serviceArr[0]][] = 0;
+                }
+                $arr[$period][$serviceArr[0]] = [
+                        ($task['task-1'] + $arr[$period][$serviceArr[0]][0]),
+                        ($task['task-0'] + $arr[$period][$serviceArr[0]][1]),
+                    ];
+            }
+
+        }
+
+        $lines = [];
+        foreach($csvPeriods as $period){
+            $lines[$period] = [];
+            foreach($arr[$period] as $key=>$line){
+                $lines[$period][] = implode(",", $line);
+            }
+            $lines[$period] = implode("\n", $lines[$period]);
+        }
+        return $lines;
+    }
+
     /**
      * save file to S3
      */
@@ -186,13 +226,17 @@ class TaskReport
         foreach($csv as $csvType){
             Storage::disk('s3')->put("cyfe/".$this->service."-$csvType.csv", $this->csv[$csvType]);
         }
+
+        foreach(['today',  'yesterday', 'last-seven-days'] as $csvType){
+            Storage::disk('s3')->put("cyfe/".$this->service."-summary-$csvType.csv", $this->csvSummary[$csvType]);
+        }
     }
 
     private function getAllTasksForService(){
         $sql = "Select * FROM Task Where ServiceName = '".$this->service."'";
         $rs = DB::SELECT($sql);
         foreach($rs as $key=>$value){
-            $this->allTasksForService[$value->ServiceName."-".$value->TaskName]['id'] = $value->id;
+            $this->allTasksForService[$value->ServiceName."@@@".$value->TaskName]['id'] = $value->id;
         }
     }
 }
