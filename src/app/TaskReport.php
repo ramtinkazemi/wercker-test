@@ -54,7 +54,7 @@ class TaskReport
         if ($daysBack == 1) { //yesterday
             $daysBack = "AND created_at < CURRENT_DATE() AND created_at >= CURRENT_DATE() -$daysBack ";
         }elseif($daysBack == 0) {
-            $daysBack = "";
+            $daysBack = "AND created_at >= CURRENT_DATE()";
         }else{ //today and last seven days
           $daysBack = "AND created_at >= CURRENT_DATE() -$daysBack";
         }
