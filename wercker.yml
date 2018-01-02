@@ -117,13 +117,13 @@ deploy-to-ecs-task-definition:
         task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
 
     - steven-rho/aws-ecs-task-definition@0.0.1:
-        name: Setup Task Definition (crutils-migration)
+        name: Setup Task Definition (crutils-metrics-migrate)
         key: $STEP_AWS_ACCESS_KEY_ID
         secret: $STEP_AWS_SECRET_ACCESS_KEY
         region: $STEP_AWS_DEFAULT_REGION
-        task-definition-name: crutils-migration
+        task-definition-name: crutils-metrics-migrate
         container-memory: 512
-        container_command: "[\"/usr/local/bin/php\",\"/var/www/html/artisan\", \"migration\"]"
+        container_command: "[\"/usr/local/bin/php\",\"/var/www/html/artisan\", \"migrate\"]"
         task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
 
   after-steps:
@@ -156,10 +156,17 @@ deploy-to-ecs-service:
             aws configure set aws_secret_access_key ${STEP_AWS_SECRET_ACCESS_KEY} --profile ${STEP_AWS_PROFILE}
             aws configure set region ${STEP_AWS_DEFAULT_REGION} --profile ${STEP_AWS_PROFILE}
 
-            aws ecs run-task \
+            TASK_ARN = $(aws ecs run-task \
             --profile ${STEP_AWS_PROFILE} \
             --cluster $STEP_CLUSTER \
-            --task-definition crutils-migration
+            --task-definition crutils-metrics-migrate \
+            --output text --query 'tasks[].taskArn')
+
+            aws ecs wait tasks-stopped \
+            --profile ${STEP_AWS_PROFILE} \
+            --cluster $STEP_CLUSTER \
+            --tasks $TASK_ARN
+
 
     - steven-rho/aws-ecs-service:
         name: Setup Service (crutils-metrics)
