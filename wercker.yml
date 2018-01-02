@@ -116,6 +116,16 @@ deploy-to-ecs-task-definition:
         container_command: "[\"/usr/local/bin/php\",\"/var/www/html/artisan\", \"crutils:geckoboard:update\"]"
         task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
 
+    - steven-rho/aws-ecs-task-definition@0.0.1:
+        name: Setup Task Definition (crutils-migration)
+        key: $STEP_AWS_ACCESS_KEY_ID
+        secret: $STEP_AWS_SECRET_ACCESS_KEY
+        region: $STEP_AWS_DEFAULT_REGION
+        task-definition-name: crutils-migration
+        container-memory: 512
+        container_command: "[\"/usr/local/bin/php\",\"/var/www/html/artisan\", \"migration\"]"
+        task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
+
   after-steps:
       - install-packages:
           packages: curl
@@ -124,12 +134,7 @@ deploy-to-ecs-task-definition:
           channel: releases
           username: wercker
 
-#      - install-packages:
-#          packages: ruby
-#      - wantedly/pretty-slack-notify:
-#          webhook_url: $SLACK_WEBHOOK_URL
-#          channel: releases
-#          username: wercker
+
 
 #####
 #
@@ -141,6 +146,21 @@ deploy-to-ecs-task-definition:
 deploy-to-ecs-service:
   box: quay.io/steven_rho/aws-cli
   steps:
+
+    - script:
+         name: Run Migration
+         code: |
+            STEP_AWS_PROFILE=wercker-step-aws-ecs
+
+            aws configure set aws_access_key_id ${STEP_AWS_ACCESS_KEY_ID} --profile ${STEP_AWS_PROFILE}
+            aws configure set aws_secret_access_key ${STEP_AWS_SECRET_ACCESS_KEY} --profile ${STEP_AWS_PROFILE}
+            aws configure set region ${STEP_AWS_DEFAULT_REGION} --profile ${STEP_AWS_PROFILE}
+
+            aws ecs run-task \
+            --profile ${STEP_AWS_PROFILE} \
+            --cluster $STEP_CLUSTER \
+            --task-definition crutils-migration
+
     - steven-rho/aws-ecs-service:
         name: Setup Service (crutils-metrics)
         key: $STEP_AWS_ACCESS_KEY_ID
@@ -151,6 +171,8 @@ deploy-to-ecs-service:
         task-definition-name: crutils-metrics
         desired-count: 1
         service-template: wercker/service/service.json.template
+
+
 
   after-steps:
       - install-packages:
