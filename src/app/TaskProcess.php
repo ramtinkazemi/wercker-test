@@ -68,6 +68,8 @@ class TaskProcess
                             $t->TaskComplete = true;
                             $t->TaskLogId = $paramsArr['TaskLogId']; // since any of the tasks can complete first lets make sure we capture which one was the completed one
                             $t->DurationSeconds = $paramsArr['DurationSeconds'];
+                            $t->RecordsProcessedOK = $paramsArr['RecordsProcessedOK'];
+                            $t->RecordsProcessedFail = $paramsArr['RecordsProcessedFail'];
                             $t->save();
                             $paramsArr['TaskId'] = $t->id;
                         }else{

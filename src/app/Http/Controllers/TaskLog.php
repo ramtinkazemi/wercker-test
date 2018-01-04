@@ -18,7 +18,9 @@ class TaskLog extends Controller
                     'ServiceName' => 'your-service-name',
                     'TaskName' => 'your-task-name',
                     'TaskLogId' => 000000000,
-                    'RecordsProcessed' => 1
+                    'RecordsProcessed' => 1,
+                    'RecordsProcessedOK' => 1,
+                    'RecordsProcessedFail' => 1
                 ],
                 'method' => "/tasklog",
                 'http' => "put or patch",
@@ -133,18 +135,18 @@ class TaskLog extends Controller
      */
     public function update(Request $request, $id)
     {
-        // First we fetch the Request instance
-       // $request = Request::instance();
-
         // Now we can get the content from it
         $content = $request->getContent();
 
         //get the associative array
         $params = json_decode($content, true);
-        //print_r($params);die;
-
-        //$params['TaskLogId'] = $id;
-
+        // add optional parameters
+        if(!array_key_exists('RecordsProcessedOK', $params)){
+            $params['RecordsProcessedOK'] = 0;
+        }
+        if(!array_key_exists('RecordsProcessedFail', $params)){
+            $params['RecordsProcessedFail'] = 0;
+        }
         // save the request
         $tp = new TaskProcess($params);
         return response()->json($tp->result, $tp->result['httpResponse']);
