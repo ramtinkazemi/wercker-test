@@ -51,7 +51,7 @@ class TaskReport
      */
     private function getExecutionsForDays($daysBack)
     {
-        if ($daysBack == 1) { //yesterday
+        if ($daysBack == 1 || $daysBack == 7) { //yesterday
             $daysBack = "AND created_at < CURRENT_DATE() AND created_at >= CURRENT_DATE() -$daysBack ";
         }elseif($daysBack == 0) {
             $daysBack = "AND created_at >= CURRENT_DATE()";
