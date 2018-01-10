@@ -37,6 +37,9 @@ class CRGeckoBoard
         foreach($services as $service){
             $tr = new TaskReport($service);
         }
+
+        // post the SQS numbers
+        $sqs = new \App\SQSMetric();
     }
 
     /**
@@ -226,7 +229,6 @@ class CRGeckoBoard
     public function updateTaskLog(){
         $services = ["crutils", "Transaction-DTI", ""]; //we only push selected services
         $sql  = "SELECT ServiceName, TaskName, COUNT(*)  as Executions, AVG(DurationSeconds) as AverageDuration, SUM(RecordsProcessed) as RecordsProcessed, TaskComplete FROM TaskLog WHERE created_at > CURRENT_DATE() GROUP BY ServiceName, TaskName, TaskComplete ORDER BY ServiceName, TaskName, TaskComplete";
-
     }
 
 
