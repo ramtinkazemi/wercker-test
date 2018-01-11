@@ -45,7 +45,7 @@ class TaskProcess
             $result['description'] = 'task created';
 
 
-        }else{
+        }else{ // update task
 
             //check if this task is already completed
 
@@ -78,11 +78,11 @@ class TaskProcess
                             $result['description'] = 'task not found';
                         }
                     }catch(Exception $e){
-
                         $result['result'] = true;
                         $result['httpResponse'] = 404;
                         $result['description'] = 'task log not found'.$e->getMessage();
-                        CRLog("debug", "debug statement, ".$result['httpResponse'].", ".$result['description'].", ".$e->getMessage(), json_encode($result), __CLASS__, __FUNCTION__, __LINE__);
+                        CRLog("error", "Exception", "Task log id : ".$paramsArr['TaskLogId'].", ".$result['httpResponse'].", ".$result['description'].", \n".$e->getMessage().",\n". json_encode($result), __CLASS__, __FUNCTION__, __LINE__);
+                        return $result;
                     }
 
 
