@@ -96,6 +96,8 @@ class SQSMetric
         }
         $this->csv = implode("\n", $lines);
         // laravel storage
-        \Illuminate\Support\Facades\Storage::disk('s3')->put("cyfe/aws-sqs-queues.csv", $this->csv);
+        if(env('APP_ENV') != 'testing') {
+            \Illuminate\Support\Facades\Storage::disk('s3')->put("cyfe/aws-sqs-queues.csv", $this->csv);
+        }
     }
 }

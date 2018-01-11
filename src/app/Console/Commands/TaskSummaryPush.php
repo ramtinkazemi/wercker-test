@@ -39,5 +39,6 @@ class TaskSummaryPush extends Command
     public function handle()
     {
         $ts = new TaskReport($this->argument('service-name'));
+        return 0;
     }
 }

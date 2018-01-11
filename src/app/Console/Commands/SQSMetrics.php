@@ -38,5 +38,6 @@ class SQSMetrics extends Command
     public function handle()
     {
        $sqs = new \App\SQSMetric();
+       return 0;
     }
 }

@@ -70,7 +70,7 @@ class TaskLog extends Controller
      */
     public function create()
     {
-        //
+        return response()->json([], 400);
     }
 
     /**
@@ -113,7 +113,7 @@ class TaskLog extends Controller
      */
     public function show($id)
     {
-        //
+        return response()->json([$id], 400);
     }
 
     /**
@@ -124,13 +124,14 @@ class TaskLog extends Controller
      */
     public function edit($id)
     {
-        //
+        return response()->json([$id], 400);
     }
 
     /**
      * Update the specified resource in storage. PUT/PATCH
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param  $id,  task log id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -141,6 +142,9 @@ class TaskLog extends Controller
         //get the associative array
         $params = json_decode($content, true);
         // add optional parameters
+        if(!array_key_exists('RecordsProcessed', $params)){
+            $params['RecordsProcessed'] = 0;
+        }
         if(!array_key_exists('RecordsProcessedOK', $params)){
             $params['RecordsProcessedOK'] = 0;
         }
@@ -160,7 +164,7 @@ class TaskLog extends Controller
      */
     public function destroy($id)
     {
-        //
+        return response()->json([$id], 400);
     }
 
 

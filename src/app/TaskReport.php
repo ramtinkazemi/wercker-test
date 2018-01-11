@@ -235,13 +235,16 @@ class TaskReport
      * save file to S3
      */
     private function saveS3(){
-        $csv = ['all', 'incomplete-today', 'incomplete-yesterday', 'incomplete-last-seven-days'];
-        foreach($csv as $csvType){
-            Storage::disk('s3')->put("cyfe/".$this->service."-$csvType.csv", $this->csv[$csvType]);
-        }
-
-        foreach(['today',  'yesterday', 'last-seven-days'] as $csvType){
-            Storage::disk('s3')->put("cyfe/".$this->service."-summary-$csvType.csv", $this->csvSummary[$csvType]);
+        if(env('APP_ENV') != 'testing'){ //only save when not unit testing
+            $csv = ['all', 'incomplete-today', 'incomplete-yesterday', 'incomplete-last-seven-days'];
+            foreach($csv as $csvType){
+                Storage::disk('s3')->put("cyfe/".$this->service."-$csvType.csv", $this->csv[$csvType]);
+            }
+            foreach(['today',  'yesterday', 'last-seven-days'] as $csvType){
+                Storage::disk('s3')->put("cyfe/".$this->service."-summary-$csvType.csv", $this->csvSummary[$csvType]);
+            }
+        }else{
+            CRLog("debug", "Not saving to S3", "", __CLASS__, __FUNCTION__, __LINE__);
         }
     }
 
