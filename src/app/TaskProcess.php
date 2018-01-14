@@ -105,7 +105,7 @@ class TaskProcess
                 $paramsArr['DurationSeconds'] = $finishTime->diffInSeconds($startTime);
                 $paramsArr['TaskComplete'] = true;
                 try{
-                    $t = Task::where('ServiceName',  '=' , $paramsArr['ServiceName'])->where('TaskName', '=' ,$paramsArr['TaskName'])->first();
+                    $t = Task::find($tl->TaskId);
                     if(count($t) > 0){
                         $t->RecordsProcessed = $paramsArr['RecordsProcessed'];
                         $t->TaskComplete = true;

@@ -92,8 +92,18 @@ class TaskLog extends Controller
 
         // save the request
         if(is_array($params)){
-            $tp = new TaskProcess($params);
-            return response()->json($tp->result, $tp->result['httpResponse']);
+            if(array_key_exists('ServiceName', $params) && array_key_exists('TaskName', $params)){
+                $tp = new TaskProcess($params);
+                return response()->json($tp->result, $tp->result['httpResponse']);
+            }else{
+                $result = [
+                    'result' => false,
+                    'description'=> 'invalid payload',
+                    'message' => $content,
+                    'samplePayload' => $this->samplePayload
+                ];
+                return response()->json($result, 400);
+            }
         }else{
             $result = [
                 'result' => false,
@@ -104,6 +114,7 @@ class TaskLog extends Controller
             return response()->json($result, 400);
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -141,19 +152,40 @@ class TaskLog extends Controller
 
         //get the associative array
         $params = json_decode($content, true);
-        // add optional parameters
-        if(!array_key_exists('RecordsProcessed', $params)){
-            $params['RecordsProcessed'] = 0;
+        if(is_array($params)) {
+            if (array_key_exists('ServiceName', $params) && array_key_exists('TaskName', $params)) {
+                // add optional parameters
+                if(!array_key_exists('RecordsProcessed', $params)){
+                    $params['RecordsProcessed'] = 0;
+                }
+                if(!array_key_exists('RecordsProcessedOK', $params)){
+                    $params['RecordsProcessedOK'] = 0;
+                }
+                if(!array_key_exists('RecordsProcessedFail', $params)){
+                    $params['RecordsProcessedFail'] = 0;
+                }
+                // save the request
+                $tp = new TaskProcess($params);
+                return response()->json($tp->result, $tp->result['httpResponse']);
+            }else{
+                $result = [
+                    'result' => false,
+                    'description'=> 'invalid payload',
+                    'message' => $content,
+                    'samplePayload' => $this->samplePayload
+                ];
+                return response()->json($result, 400);
+            }
+        }else{
+            $result = [
+                'result' => false,
+                'description'=> 'invalid payload',
+                'message' => $content,
+                'samplePayload' => $this->samplePayload
+            ];
+            return response()->json($result, 400);
         }
-        if(!array_key_exists('RecordsProcessedOK', $params)){
-            $params['RecordsProcessedOK'] = 0;
-        }
-        if(!array_key_exists('RecordsProcessedFail', $params)){
-            $params['RecordsProcessedFail'] = 0;
-        }
-        // save the request
-        $tp = new TaskProcess($params);
-        return response()->json($tp->result, $tp->result['httpResponse']);
+
     }
 
     /**
