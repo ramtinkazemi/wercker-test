@@ -1,7 +1,7 @@
 version: "2"
 
 services:
- php-fpm:
+  php-fpm:
     container_name: crutils-metrics-php-fpm
     build:
           context: .
@@ -12,7 +12,7 @@ services:
     ports:
      - "9000:9000"
 
- nginx:
+  nginx:
     container_name: crutils-metrics-nginx
     image: nginx
     ports:
@@ -25,14 +25,25 @@ services:
         # /etc/nginx/conf.d/default.conf
         # /var/www/html [ image default = /usr/share/nginx/html ]
 
- mysql:
+  mysql:
     container_name: crutils-metrics-mysql
     image: mysql
     restart: always
     environment:
       MYSQL_DATABASE: CRutils_metrics
       MYSQL_ROOT_PASSWORD: "<YourStrong!Passw0rd>"
+      MYSQL_USER: CRutils_metrics
+      MYSQL_PASSWORD: CRutils_metrics
     ports:
       - "3306:3306"
     logging:
       driver: none
+
+  mssql:
+    container_name: mssql
+    image: microsoft/mssql-server-linux
+    ports:
+      - "1433:1433"
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=<YourStrong!Passw0rd>"

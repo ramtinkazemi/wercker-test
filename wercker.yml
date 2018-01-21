@@ -2,16 +2,113 @@ box:
   id: quay.io/cashrewards/php-base-ms
   username: $QUAYIO_USERNAME
   password: $QUAYIO_PASSWORD
-  tag: master
+  tag: mssql
   registry: https://quay.io
+
+dev:
+  services:
+    - id: mysql
+      env:
+        MYSQL_DATABASE: CRutils_metrics
+        MYSQL_ROOT_PASSWORD: "<YourStrong!Passw0rd>"
+        MYSQL_USER: CRutils_metrics
+        MYSQL_PASSWORD: CRutils_metrics
+
+    - id: microsoft/mssql-server-linux:latest
+      env:
+        ACCEPT_EULA: Y
+        SA_PASSWORD: "<YourStrong!Passw0rd>"
+
+  steps:
+    - script:
+        name: test
+        code: |
+          pwd
+          ls -al $WERCKER_SOURCE_DIR
+
+    - script:
+        name: copy source code
+        code: |
+           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
+#    - script:
+#        name: update dependencies
+#        code: |
+#          export COMPOSER_ALLOW_SUPERUSER=1
+#          composer update --no-interaction --working-dir=/var/www/html
+    - script:
+        name: set permission
+        code: |
+           chown -R :www-data /var/www/html
+           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+
+#    - script:
+#        name: "Wait for mySQL connection"
+#        code: |
+#            bash
+#            while ! nc -q 1 $MYSQL_PORT_3306_TCP_ADDR $MYSQL_PORT_3306_TCP_PORT
+#            </dev/null; do sleep 3; done
+
+    - internal/shell:
+        cmd: /bin/bash
+
+#    - script:
+#        name: test
+#        code: |
+#           cd /var/www/html
+#           vendor/bin/phpunit --debug --filter Feature
 
 build:
   steps:
     - script:
+        name: test
+        code: |
+          pwd
+          ls -al $WERCKER_SOURCE_DIR
+
+    - script:
+        name: copy source code
+        code: |
+           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
+
+    - script:
         name: update dependencies
+        code: |
+          export COMPOSER_ALLOW_SUPERUSER=1
+          composer update --no-interaction --working-dir=/var/www/html
+
+    - script:
+        name: set permission
+        code: |
+           chown -R :www-data /var/www/html
+           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+
+
+unittest:
+  services:
+    - id: mysql
+      env:
+        MYSQL_DATABASE: CRutils_metrics
+        MYSQL_ROOT_PASSWORD: "<YourStrong!Passw0rd>"
+        MYSQL_USER: CRutils_metrics
+        MYSQL_PASSWORD: CRutils_metrics
+
+    - id: microsoft/mssql-server-linux:latest
+      env:
+        ACCEPT_EULA: Y
+        SA_PASSWORD: "<YourStrong!Passw0rd>"
+  steps:
+    - script:
+        name: check html files
         code: |
           ls -al $WERCKER_SOURCE_DIR
           ls -al $WERCKER_OUTPUT_DIR
+          ls -al /var/www/html
+
+    - script:
+        name: test
+        code: |
+           cd /var/www/html
+           vendor/bin/phpunit --debug
 
 
 push-to-quayio:

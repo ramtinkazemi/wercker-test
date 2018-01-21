@@ -17,7 +17,6 @@
     "require": {
         "php": ">=7.0.0",
         "aws/aws-sdk-php": "3.*",
-        "barryvdh/laravel-ide-helper": "^2.4",
         "cashrewards/elasticsearch": "@dev",
         "cashrewards/plainqueue": "@dev",
         "doctrine/dbal": "^2.6",
@@ -29,11 +28,12 @@
         "predis/predis": "^1.1"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^2.4",
         "filp/whoops": "~2.0",
         "fzaninotto/faker": "~1.4",
         "mockery/mockery": "~1.0",
-        "phpunit/phpunit": "~6.0",
-        "phpunit/php-code-coverage": "^5.3"
+        "phpunit/php-code-coverage": "^5.3",
+        "phpunit/phpunit": "~6.0"
     },
     "autoload": {
         "classmap": [

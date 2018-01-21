@@ -21,7 +21,7 @@ class LibratoControllerTest extends TestCase
         $params = [
             "app" => 'your-app-name',
             "taskname"=>'your-task-name',
-            "name"=>"your-metric-name",
+            "metric"=>"your-metric-name",
             "value" => 0.2,
             "tags" => [
                 "tax-example" => "david-jones"
@@ -29,6 +29,6 @@ class LibratoControllerTest extends TestCase
         ];
         $response = $this->json('POST', '/metriclibrato', $params);
         echo "\n\n".$response->getContent()."\n\n";
-        $response->assertStatus(200);
+        $response->assertStatus(202);
     }
 }

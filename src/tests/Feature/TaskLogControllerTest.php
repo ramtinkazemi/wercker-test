@@ -8,8 +8,8 @@ use Artisan;
 
 class TasklogControllerTest extends TestCase
 {
-
-
+    use RefreshDatabase;
+/*
     public function setUp()
     {
         if(env('APP_ENV') == "testing") {
@@ -20,7 +20,7 @@ class TasklogControllerTest extends TestCase
             // Artisan::call('db:seed');
         }
     }
-
+*/
 
     /**
      * /tasklog home should not return anything
