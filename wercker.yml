@@ -51,19 +51,17 @@ dev:
     - internal/shell:
         cmd: /bin/bash
 
-#    - script:
-#        name: test
-#        code: |
-#           cd /var/www/html
-#           vendor/bin/phpunit --debug --filter Feature
 
 build:
   steps:
     - script:
         name: test
         code: |
+          echo 'pwd'
           pwd
+          echo 'WERCKER_SOURCE_DIR/src'
           ls -al $WERCKER_SOURCE_DIR/src
+          whoami
 
 #    - script:
 #        name: copy source code
@@ -82,6 +80,11 @@ build:
 #           chown -R :www-data /var/www/html
 #           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
 
+    - script:
+        name: update dependencies
+        code: |
+          cp -Rp $WERCKER_SOURCE_DIR/src $WERCKER_OUTPUT_DIR
+          ls -al $WERCKER_OUTPUT_DIR
 
 unittest:
   services:
@@ -124,7 +127,10 @@ push-to-quayio:
         name: test
         code: |
           pwd
+          ls -al $WERCKER_SOURCE_DIR
           ls -al $WERCKER_SOURCE_DIR/src
+          ls -al $WERCKER_OUTPUT_DIR
+
     #####################################
     # Ref from https://github.com/Microsoft/msphpsql/wiki/Dockerfile-for-adding-pdo_sqlsrv-and-sqlsrv-to-official-php-image
     #           https://blogs.msdn.microsoft.com/sqlnativeclient/2017/06/30/servicing-update-for-odbc-driver-13-1-for-linux-and-macos-released/
