@@ -24,7 +24,7 @@ class TaskReportTest extends TestCase
         ]);
         $this->assertEquals(0, $resultAsText);
     }
-/*
+
     public function testSQScommand()
     {
         $resultAsText  = Artisan::call('crutils:sqs:metrics', [
@@ -32,5 +32,4 @@ class TaskReportTest extends TestCase
         ]);
         $this->assertEquals(0, $resultAsText);
     }
-*/
 }
