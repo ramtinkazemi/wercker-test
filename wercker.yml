@@ -78,12 +78,13 @@ build:
           export COMPOSER_ALLOW_SUPERUSER=1
           composer update --no-interaction --working-dir=./src
 
-    - script:
-        name: copy files to output
-        code: |
-          cp -Rp $WERCKER_SOURCE_DIR/src $WERCKER_OUTPUT_DIR
-          cp -Rp $WERCKER_SOURCE_DIR/wercker $WERCKER_OUTPUT_DIR
-          cp -Rp $WERCKER_SOURCE_DIR/wercker.yml $WERCKER_OUTPUT_DIR/
+#    - script:
+#        name: copy files to output
+#        code: |
+#          cp -Rp $WERCKER_SOURCE_DIR/src $WERCKER_OUTPUT_DIR
+#          cp -Rp $WERCKER_SOURCE_DIR/wercker $WERCKER_OUTPUT_DIR
+#          cp -Rp $WERCKER_SOURCE_DIR/wercker.yml $WERCKER_OUTPUT_DIR/
+
 #    - script:
 #        name: set permission
 #        code: |
@@ -118,7 +119,11 @@ unittest:
         name: test
         code: |
            cd $WERCKER_SOURCE_DIR/src
+           echo '>> PWD'
+           pwd
+           echo '>> PHPUNIT'
            vendor/bin/phpunit --debug
+           $WERCKER_SOURCE_DIR/src/vendor/bin/phpunit --debug
 
   after-steps:
       - install-packages:
