@@ -75,6 +75,12 @@ build:
           export COMPOSER_ALLOW_SUPERUSER=1
           composer update --no-interaction --working-dir=./src
 
+    - script:
+        name: copy files to output
+        code: |
+          cp -Rp $WERCKER_SOURCE_DIR/src $WERCKER_OUTPUT_DIR
+          cp -Rp $WERCKER_SOURCE_DIR/wercker $WERCKER_OUTPUT_DIR
+          cp -Rp $WERCKER_SOURCE_DIR/wercker.yml $WERCKER_OUTPUT_DIR/
 #    - script:
 #        name: set permission
 #        code: |
@@ -102,6 +108,7 @@ unittest:
           ls -al $WERCKER_SOURCE_DIR
           echo '>>> $WERCKER_OUTPUT_DIR'
           ls -al $WERCKER_OUTPUT_DIR
+          echo '>>> SOURCE DIR'
           ls -al ./src
 
     - script:
@@ -142,11 +149,6 @@ push-to-quayio:
         code: |
            chown -R :www-data /var/www/html
            chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
-
-    - script:
-        name: remove wercker files
-        code: |
-           rm -rf /pipeline
 
     - internal/docker-push:
         username: $QUAYIO_USERNAME
