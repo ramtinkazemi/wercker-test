@@ -66,22 +66,24 @@ build:
           echo '--- WERCKER_SOURCE_DIR/src'
           ls -al $WERCKER_SOURCE_DIR/src
 
-
-#    - script:
-#        name: copy source code
-#        code: |
-#           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
-
     - script:
         name: update dependencies
         code: |
+          export COMPOSER_CACHE_DIR="${WERCKER_CACHE_DIR}/wercker/composer"
+          mkdir -p $COMPOSER_CACHE_DIR
           export COMPOSER_ALLOW_SUPERUSER=1
+          composer self-update
           composer update --no-interaction --working-dir=./src
 
     - script:
         name: test
         code: |
           ls -al $WERCKER_SOURCE_DIR/src/vendor/bin
+
+
+    - wacul/store-link:
+        type: store
+        prefix: src/vendor/bin
 
 #    - script:
 #        name: copy files to output
@@ -110,6 +112,10 @@ unittest:
         ACCEPT_EULA: Y
         SA_PASSWORD: "<YourStrong!Passw0rd>"
   steps:
+    - wacul/store-link:
+        type: restore
+        prefix: src/vendor/bin
+
     - script:
         name: check html files
         code: |
