@@ -63,24 +63,24 @@ build:
         name: test
         code: |
           pwd
-          ls -al $WERCKER_SOURCE_DIR
+          ls -al $WERCKER_SOURCE_DIR/src
 
-    - script:
-        name: copy source code
-        code: |
-           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
+#    - script:
+#        name: copy source code
+#        code: |
+#           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
 
     - script:
         name: update dependencies
         code: |
           export COMPOSER_ALLOW_SUPERUSER=1
-          composer update --no-interaction --working-dir=/var/www/html
+          composer update --no-interaction --working-dir=./src
 
-    - script:
-        name: set permission
-        code: |
-           chown -R :www-data /var/www/html
-           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+#    - script:
+#        name: set permission
+#        code: |
+#           chown -R :www-data /var/www/html
+#           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
 
 
 unittest:
@@ -102,14 +102,21 @@ unittest:
         code: |
           ls -al $WERCKER_SOURCE_DIR
           ls -al $WERCKER_OUTPUT_DIR
-          ls -al /var/www/html
+          ls -al ./src
 
     - script:
         name: test
         code: |
-           cd /var/www/html
+           cd $WERCKER_SOURCE_DIR/src
            vendor/bin/phpunit --debug
 
+  after-steps:
+      - install-packages:
+          packages: curl
+      - slack-notifier:
+          url: $SLACK_WEBHOOK_URL
+          channel: releases
+          username: wercker
 
 push-to-quayio:
   steps:
@@ -117,7 +124,7 @@ push-to-quayio:
         name: test
         code: |
           pwd
-          ls -al $WERCKER_SOURCE_DIR
+          ls -al $WERCKER_SOURCE_DIR/src
     #####################################
     # Ref from https://github.com/Microsoft/msphpsql/wiki/Dockerfile-for-adding-pdo_sqlsrv-and-sqlsrv-to-official-php-image
     #           https://blogs.msdn.microsoft.com/sqlnativeclient/2017/06/30/servicing-update-for-odbc-driver-13-1-for-linux-and-macos-released/
