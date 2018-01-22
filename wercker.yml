@@ -57,12 +57,15 @@ build:
     - script:
         name: test
         code: |
-          echo '--- pwd'
-          pwd
-          echo '--- WERCKER_SOURCE_DIR/src'
-          ls -al $WERCKER_SOURCE_DIR/src
           echo '--- WHOAMI'
           whoami
+          echo '--- pwd'
+          pwd
+           echo '--- WERCKER_SOURCE_DIR'
+           ls -al $WERCKER_SOURCE_DIR
+          echo '--- WERCKER_SOURCE_DIR/src'
+          ls -al $WERCKER_SOURCE_DIR/src
+
 
 #    - script:
 #        name: copy source code
@@ -160,6 +163,12 @@ push-to-quayio:
         cmd: /run.sh
         disable-sync: false
         volumes: /etc/nginx/conf.d/,/var/www/html/
+
+    - script:
+        name: Copy wercker files for deployment
+        code: |
+          cp -Rp $WERCKER_SOURCE_DIR/wercker $WERCKER_OUTPUT_DIR
+          cp -Rp $WERCKER_SOURCE_DIR/wercker.yml $WERCKER_OUTPUT_DIR/
 
   after-steps:
       - install-packages:
