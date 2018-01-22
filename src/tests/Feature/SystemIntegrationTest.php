@@ -21,6 +21,6 @@ class SystemIntegrationTest extends TestCase
         $result = DB::connection('sqlsrv')->select('select getdate()');
         $this->assertNotEmpty($result);
 
-        $this->assertTrue(false);
+        //$this->assertTrue(false);
     }
 }

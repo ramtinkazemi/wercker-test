@@ -75,15 +75,17 @@ build:
           composer self-update
           composer update --no-interaction --working-dir=./src
 
-    - script:
-        name: test
-        code: |
-          ls -al $WERCKER_SOURCE_DIR/src/vendor/bin
 
 
     - wacul/store-link:
         type: store
         prefix: src/vendor/bin
+
+    - script:
+        name: test
+        code: |
+          ls -al $WERCKER_SOURCE_DIR/src/vendor/bin
+
 
 #    - script:
 #        name: copy files to output
@@ -128,12 +130,16 @@ unittest:
           echo '>>> VENDOR BIN DIR'
           ls -al $WERCKER_SOURCE_DIR/src/vendor/bin
 
+#           export DB_HOST=$MYSQL_PORT_3306_TCP_ADDR
+#           export DB_PORT=$MYSQL_PORT_3306_TCP_PORT
     - script:
         name: test
         code: |
            cd $WERCKER_SOURCE_DIR/src
            echo '>> PWD'
            pwd
+           sleep 60
+           export DB_HOST_crutils
            echo '>> PHPUNIT'
            vendor/bin/phpunit --debug
            $WERCKER_SOURCE_DIR/src/vendor/bin/phpunit --debug
