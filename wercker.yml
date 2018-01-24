@@ -86,6 +86,13 @@ build:
         code: |
           ls -al $WERCKER_SOURCE_DIR/src/vendor/bin
 
+  after-steps:
+      - install-packages:
+          packages: curl
+      - slack-notifier:
+          url: $SLACK_WEBHOOK_URL
+          channel: releases
+          username: wercker
 
 #    - script:
 #        name: copy files to output
