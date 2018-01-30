@@ -136,9 +136,13 @@ unittest:
           ls -al ./src
           echo '>>> VENDOR BIN DIR'
           ls -al $WERCKER_SOURCE_DIR/src/vendor/bin
-
-#           export DB_HOST=$MYSQL_PORT_3306_TCP_ADDR
-#           export DB_PORT=$MYSQL_PORT_3306_TCP_PORT
+    - script:
+        name: setup mysql
+        code: |
+           export DB_HOST=$MYSQL_PORT_3306_TCP_ADDR
+           export DB_PORT=$MYSQL_PORT_3306_TCP_PORT
+           export DB_HOST_crutils=$MYSQL_PORT_3306_TCP_ADDR
+           export DB_PORT_crutils=$MYSQL_PORT_3306_TCP_PORT
     - script:
         name: setup mssql
         code: |
