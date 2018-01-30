@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 class SqlCmd
 {
-    protected $server;
+    protected $host;
     protected $username;
     protected $password;
 
@@ -16,11 +16,32 @@ class SqlCmd
     protected $outputOnError;
 
 
-    public function __construct()
+    public function __construct($configuration = [])
     {
-        $this->server = 'mssql';
-        $this->username = 'SA';
-        $this->password = '<YourStrong!Passw0rd>';
+        empty($configuration) AND $configuration = \DB::connection('sqlsrv')->getConfig();
+
+        $this->initialize($configuration);
+    }
+
+    public function initialize($configuration = [])
+    {
+        $config = ['host' => 'mssql', 'username' => 'SA', 'password' => '<YourStrong!Passw0rd>'];
+
+        foreach ($config AS $k => $v) {
+            if (array_key_exists($k, $configuration)) {
+                $config[$k] = $configuration[$k];
+            }
+        }
+
+        $this->host = $configuration['host'];
+        $this->username = $configuration['username'];
+        $this->password = $configuration['password'];
+    }
+
+    public function reset()
+    {
+        $this->query = null;
+        $this->file = null;
     }
 
     public function getOutput()
@@ -48,6 +69,7 @@ class SqlCmd
 
     public function file($files)
     {
+
         $ret = false;
 
         if (!is_array($files)) {
@@ -56,11 +78,10 @@ class SqlCmd
 
         foreach ($files AS $file) {
             $this->file = $file;
-            if (! $ret = $this->exec()) {
+            if (!$ret = $this->exec()) {
                 break;
             }
         }
-
         return $ret;
     }
 
@@ -70,8 +91,7 @@ class SqlCmd
 
         if (isset($this->query)) {
             $args[] = "-Q '{$this->query}'";
-        }
-        elseif (isset($this->file)) {
+        } elseif (isset($this->file)) {
             $args[] = "-i {$this->file}";
         }
 
@@ -79,10 +99,10 @@ class SqlCmd
             $args[] = "-d {$this->database}";
         }
         $args_str = implode(' ', $args);
-        $cmd = "/opt/mssql-tools/bin/sqlcmd -S {$this->server} -U {$this->username} -P '{$this->password}' -b {$args_str}";
+        $cmd = "/opt/mssql-tools/bin/sqlcmd -S {$this->host} -U {$this->username} -P '{$this->password}' -b {$args_str}";
 
 
-        color_dump(['cmd' => str_replace($this->password, 'xxxxxxxx',$cmd)]);
+        color_dump(['cmd' => str_replace($this->password, 'xxxxxxxx', $cmd)]);
 
         $lastMsg = exec($cmd, $output, $res);
         $this->output = $output;
@@ -91,17 +111,17 @@ class SqlCmd
             color_dump(['error' => $output]);
         }
 
-         return ($res === 0)? true : false;
+        $this->reset();
+        return ($res === 0) ? true : false;
     }
 
-    public function refreshDatabase()
+    public function isServerReady()
     {
-        exec(__DIR__ . '/mssql/mssql-migration.sh', $output, $res);
-        dd($output, $res);
-
+        $res = $this->query('select getdate()');
+        return $res;
     }
 
-    public function setupDatabase()
+    public function _depereacted_setupDatabase()
     {
         $this->parentRefreshDatabase();
 

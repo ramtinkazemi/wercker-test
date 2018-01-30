@@ -38,6 +38,18 @@ class CreateDatabase extends Command
     public function handle()
     {
         $sqlCmd = new \App\Helpers\SqlCmd();
+
+        $retry = 5;
+
+        do {
+            $isReady = $sqlCmd->isServerReady();
+        }while ( --$retry > 0 AND ! $isReady );
+
+        if (!$isReady) {
+            $this->error('Failed to connect mssql server');
+            return;
+        }
+
         if($sqlCmd->file(database_path('mssql/database/up.sql'))) {
             $this->info('Created mssql database');
         }

@@ -145,13 +145,13 @@ unittest:
            cd $WERCKER_SOURCE_DIR/src
            echo '>> PWD'
            pwd
-           sleep 60
            export DB_HOST_shopgo=$MSSQL_SERVER_LINUX_PORT_1433_TCP_ADDR
            php artisan database:mssql:create
 
     - script:
         name: unittest
         code: |
+           cd $WERCKER_SOURCE_DIR/src
            echo '>> PHPUNIT'
            vendor/bin/phpunit --debug
            $WERCKER_SOURCE_DIR/src/vendor/bin/phpunit --debug
