@@ -16,11 +16,13 @@ class CreateMemberAggregatesTable extends Migration
         Schema::create('MemberAggregates', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamps();
-            $table->integer('clientId');
+            $table->integer('ClientId')->default(0);
             $table->bigInteger('MemberId');
-            $table->date('LatestTr5Date');
-            $table->date('LatestSavingsDate');
-            $table->date('LastClickDate');
+            $table->date('LatestTr5Date')->nullable();
+            $table->date('LatestSavingsDate')->nullable();
+            $table->date('LastClickDate')->nullable();
+
+            $table->unique('MemberId');
         });
     }
 
