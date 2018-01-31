@@ -72,7 +72,6 @@ class CohortCustomer
             $sth = $dbh->prepare($sql);
             $sth->execute();
             $data['tr5savings'] = $sth->fetchAll(\PDO::FETCH_CLASS);
-            //print_r($sth->fetchAll(\PDO::FETCH_CLASS));die;
             $sth->nextRowset();
             $data['noTR5savings'] = $sth->fetchAll(\PDO::FETCH_CLASS);
             return $data;
@@ -101,7 +100,6 @@ class CohortCustomer
      * prepare the csv file
      */
     private function getCSV($type){
-
         $lines = [];
 
         $headers = [];
@@ -120,39 +118,45 @@ class CohortCustomer
         $lines[] = $headers;//implode(",", $headers); //fisrt line of the csv
         foreach($this->membersAll as $memberJoined=>$row){
 
-            $line = [];
-            $line[] = $memberJoined;
-            $line[] = 0;
+            $lineItem = [];
+            $lineItem[] = $memberJoined;
+            $lineItem[] = 0;
+
+            // process transaction segments
+            $totalrow = 0;
             foreach($row as $transactionDate=>$counts){
-                $totalrow = 0;
+
                 if(!array_key_exists('MemberCountActive', $counts)){
-                    $line[] = 0;
+                    $lineItem[] = 0;
                 }else{
-                    $line[] = $counts['MemberCountActive'];
+                    $lineItem[] = $counts['MemberCountActive'];
                     $totalrow = $totalrow + $counts['MemberCountActive'];
                 }
-
-                if($type == "active"){
-                    $line[1] = $totalrow;
-                }elseif($type == "all"){
-                    $line[1] = $this->membersAllNotTransacted[$memberJoined] + $totalrow;
-                }
             }
-            $lines[] = $line;
+
+            if($type == "active"){
+                $lineItem[1] = $totalrow;
+            }elseif($type == "all"){
+                $lineItem[1] = $this->membersAllNotTransacted[$memberJoined] + $totalrow;
+            }
+            $lines[] = $lineItem;
         }
 
-        foreach($lines as $key=>$line){
+        foreach($lines as $key=>$lineOne){
             $a=0;
            while($a<16){
-                if(!array_key_exists($a, $line)){
-                    $line[$a] = 0;
+                if(!array_key_exists($a, $lineOne)){
+                    $lineOne[$a] = 0;
                 }
                $a++;
            }
-           $lines[$key] = implode(",", $line);
+           $lines[$key] = implode(",", $lineOne);
 
+        }if(env('APP_ENV') == "prod"){ //only here publish
+            Storage::disk('s3')->put("cyfe/customer-cohort-$type.csv", implode("\n", $lines));
+        }else{
+            echo implode("\n", $lines)."\n";
         }
-        Storage::disk('s3')->put("cyfe/customer-cohort-$type.csv", implode("\n", $lines));
         $this->csv[$type] = implode("\n", $lines);
     }
 
