@@ -38,6 +38,6 @@ class CohortCustomer extends Command
     public function handle()
     {
         $cc = new \App\CohortCustomer();
-        echo $cc->csv;
+        print_r($cc->csv);
     }
 }

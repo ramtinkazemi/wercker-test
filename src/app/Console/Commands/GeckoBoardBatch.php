@@ -38,9 +38,9 @@ class GeckoBoardBatch extends Command
      */
     public function handle()
     {
-       // $taskId =  CRmetric(['ServiceName'=>'crutils', 'TaskName'=>$this->signature]);
         $gb = new CRGeckoBoard();
         $gb->sendBatchSQL();
-      //  $taskId =  CRmetric(['ServiceName'=I wil>'crutils', 'TaskName'=>$this->signature, 'TaskLogId'=>$taskId, 'RecordsProcessed'=>1]);
+
+        $cc = new \App\CohortCustomer();
     }
 }

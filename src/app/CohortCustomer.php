@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 class CohortCustomer
 {
     public $membersAll;
+    public $membersAllNotTransacted; // no TR5 or savings ever
     public $periods;
     public $csv;
 
@@ -24,7 +25,7 @@ class CohortCustomer
 
         $this->membersAll = [];
         $this->getAll("active");
-       // echo $this->csv;
+        $this->getAll("all");
     }
 
 
@@ -65,15 +66,19 @@ class CohortCustomer
 
         //Cache::forget($key);
 
-        $data = Cache::remember($key, 120, function () {
+        $data = Cache::remember($key, 720, function () {
             $sql = "SET NOCOUNT ON; EXEC Report_GetMemberTransActivitySummary";
             $dbh = DB::connection('sqlsrv')->getPdo();
             $sth = $dbh->prepare($sql);
             $sth->execute();
-            $data = $sth->fetchAll(\PDO::FETCH_CLASS);
+            $data['tr5savings'] = $sth->fetchAll(\PDO::FETCH_CLASS);
+            $sth->nextRowset();
+            $data['noTR5savings'] = $sth->fetchAll(\PDO::FETCH_CLASS);
             return $data;
         });
-        foreach($data as $key=>$row){
+
+
+        foreach($data['tr5savings'] as $key=>$row){
            // $dataArr  = explode("/", $row->MemberJoinMonth);
             if($row->Active == 1){
                 $this->membersAll[$row->MemberJoinMonth][$row->TransactionMonth] ['MemberCountActive']= $row->MemberCount;
@@ -81,6 +86,13 @@ class CohortCustomer
                 $this->membersAll[$row->MemberJoinMonth][$row->TransactionMonth] ['MemberCountInActive'] = $row->MemberCount;
             }
         }
+
+        // get the members that have not transacted
+
+        foreach($data['noTR5savings'] as $key=>$row){
+            $this->membersAllNotTransacted[$row->MemberJoinMonth] = $row->MemberCount;
+        }
+
         $this->getCSV($type);
     }
 
@@ -88,7 +100,6 @@ class CohortCustomer
      * prepare the csv file
      */
     private function getCSV($type){
-
         $lines = [];
 
         $headers = [];
@@ -100,42 +111,55 @@ class CohortCustomer
                 }
             }
         }
-        if($type == "active") {
+        if($type == "active" || $type == "all") {
             array_unshift($headers, "date joined", "total");
         }
 
         $lines[] = $headers;//implode(",", $headers); //fisrt line of the csv
         foreach($this->membersAll as $memberJoined=>$row){
+
+            $lineItem = [];
+            $lineItem[] = $memberJoined;
+            $lineItem[] = 0;
+
+            // process transaction segments
             $totalrow = 0;
-            $line = [];
-            $line[] = $memberJoined;
-            $line[] = 0;
             foreach($row as $transactionDate=>$counts){
+
                 if(!array_key_exists('MemberCountActive', $counts)){
-                    $line[] = 0;
+                    $lineItem[] = 0;
                 }else{
-                    $line[] = $counts['MemberCountActive'];
+                    $lineItem[] = $counts['MemberCountActive'];
                     $totalrow = $totalrow + $counts['MemberCountActive'];
                 }
-               $line[1] = $totalrow;
             }
-            $lines[] = $line;//implode("," , $line);
+
+            if($type == "active"){
+                $lineItem[1] = $totalrow;
+            }elseif($type == "all"){
+                $lineItem[1] = $this->membersAllNotTransacted[$memberJoined] + $totalrow;
+            }
+            $lines[] = $lineItem;
         }
 
-
-        foreach($lines as $key=>$line){
+        foreach($lines as $key=>$lineOne){
             $a=0;
-           while($a<15){
-                if(!array_key_exists($a, $line)){
-                    $line[$a] = 0;
+           while($a<16){
+                if(!array_key_exists($a, $lineOne)){
+                    $lineOne[$a] = 0;
                 }
                $a++;
            }
-           $lines[$key] = implode(",", $line);
+           $lines[$key] = implode(",", $lineOne);
 
+        }if(env('APP_ENV') == "prod"){ //only here publish
+            Storage::disk('s3')->put("cyfe/customer-cohort-$type.csv", implode("\n", $lines));
+        }else{
+            echo implode("\n", $lines)."\n";
         }
-        Storage::disk('s3')->put("cyfe/cystomer-cohort.csv", implode("\n", $lines));
-        $this->csv = implode("\n", $lines);
+        $this->csv[$type] = implode("\n", $lines);
     }
+
+
 
 }
