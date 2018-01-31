@@ -21,7 +21,7 @@ use Carbon\Carbon;
  */
 class TaskReport
 {
-    public $service;
+    public $service; // the service name
     public $result;
     public $csv;
     public $allTasksForService; // array of all tasks of service in Task Table
