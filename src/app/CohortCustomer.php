@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 class CohortCustomer
 {
     public $membersAll;
+    public $membersAllNotTransacted; // no TR5 or savings ever
     public $periods;
     public $csv;
 
@@ -24,7 +25,7 @@ class CohortCustomer
 
         $this->membersAll = [];
         $this->getAll("active");
-       // echo $this->csv;
+        $this->getAll("all");
     }
 
 
@@ -65,15 +66,20 @@ class CohortCustomer
 
         //Cache::forget($key);
 
-        $data = Cache::remember($key, 120, function () {
+        $data = Cache::remember($key, 720, function () {
             $sql = "SET NOCOUNT ON; EXEC Report_GetMemberTransActivitySummary";
             $dbh = DB::connection('sqlsrv')->getPdo();
             $sth = $dbh->prepare($sql);
             $sth->execute();
-            $data = $sth->fetchAll(\PDO::FETCH_CLASS);
+            $data['tr5savings'] = $sth->fetchAll(\PDO::FETCH_CLASS);
+            //print_r($sth->fetchAll(\PDO::FETCH_CLASS));die;
+            $sth->nextRowset();
+            $data['noTR5savings'] = $sth->fetchAll(\PDO::FETCH_CLASS);
             return $data;
         });
-        foreach($data as $key=>$row){
+
+
+        foreach($data['tr5savings'] as $key=>$row){
            // $dataArr  = explode("/", $row->MemberJoinMonth);
             if($row->Active == 1){
                 $this->membersAll[$row->MemberJoinMonth][$row->TransactionMonth] ['MemberCountActive']= $row->MemberCount;
@@ -81,6 +87,13 @@ class CohortCustomer
                 $this->membersAll[$row->MemberJoinMonth][$row->TransactionMonth] ['MemberCountInActive'] = $row->MemberCount;
             }
         }
+
+        // get the members that have not transacted
+
+        foreach($data['noTR5savings'] as $key=>$row){
+            $this->membersAllNotTransacted[$row->MemberJoinMonth] = $row->MemberCount;
+        }
+
         $this->getCSV($type);
     }
 
@@ -100,7 +113,7 @@ class CohortCustomer
                 }
             }
         }
-        if($type == "active") {
+        if($type == "active" || $type == "all") {
             array_unshift($headers, "date joined", "total");
         }
 
@@ -117,11 +130,14 @@ class CohortCustomer
                     $line[] = $counts['MemberCountActive'];
                     $totalrow = $totalrow + $counts['MemberCountActive'];
                 }
-               $line[1] = $totalrow;
-            }
-            $lines[] = $line;//implode("," , $line);
-        }
+                if($type == "active"){
 
+                }elseif($type == "all"){
+                    $line[1] = $this->membersAllNotTransacted[$memberJoined];
+                }
+            }
+            $lines[] = $line;
+        }
 
         foreach($lines as $key=>$line){
             $a=0;
@@ -134,8 +150,10 @@ class CohortCustomer
            $lines[$key] = implode(",", $line);
 
         }
-        Storage::disk('s3')->put("cyfe/cystomer-cohort.csv", implode("\n", $lines));
-        $this->csv = implode("\n", $lines);
+        Storage::disk('s3')->put("cyfe/customer-cohort-$type.csv", implode("\n", $lines));
+        $this->csv[$type] = implode("\n", $lines);
     }
+
+
 
 }
