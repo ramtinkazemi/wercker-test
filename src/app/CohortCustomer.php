@@ -119,21 +119,23 @@ class CohortCustomer
 
         $lines[] = $headers;//implode(",", $headers); //fisrt line of the csv
         foreach($this->membersAll as $memberJoined=>$row){
-            $totalrow = 0;
+
             $line = [];
             $line[] = $memberJoined;
             $line[] = 0;
             foreach($row as $transactionDate=>$counts){
+                $totalrow = 0;
                 if(!array_key_exists('MemberCountActive', $counts)){
                     $line[] = 0;
                 }else{
                     $line[] = $counts['MemberCountActive'];
                     $totalrow = $totalrow + $counts['MemberCountActive'];
                 }
-                if($type == "active"){
 
+                if($type == "active"){
+                    $line[1] = $totalrow;
                 }elseif($type == "all"){
-                    $line[1] = $this->membersAllNotTransacted[$memberJoined];
+                    $line[1] = $this->membersAllNotTransacted[$memberJoined] + $totalrow;
                 }
             }
             $lines[] = $line;
