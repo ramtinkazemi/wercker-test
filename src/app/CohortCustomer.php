@@ -143,7 +143,7 @@ class CohortCustomer
 
         foreach($lines as $key=>$line){
             $a=0;
-           while($a<15){
+           while($a<16){
                 if(!array_key_exists($a, $line)){
                     $line[$a] = 0;
                 }
