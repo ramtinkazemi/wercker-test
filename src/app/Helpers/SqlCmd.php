@@ -107,6 +107,7 @@ class SqlCmd
         $lastMsg = exec($cmd, $output, $res);
         $this->output = $output;
 
+        color_dump($output);
         if ($this->outputOnError && $res !== 0) {
             color_dump(['error' => $output]);
         }

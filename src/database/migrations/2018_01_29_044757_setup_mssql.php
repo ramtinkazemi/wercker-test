@@ -13,14 +13,18 @@ class SetupMssql extends Migration
      */
     public function up()
     {
-        color_dump('mssql up');
         //$res = (new \App\Helpers\SqlCmd())->query('select getdate()');
         //$res = (new \App\Helpers\SqlCmd())->outputOnError()->file(database_path('/mssql/database/up.sql'));
         //return $res;
+        if (! App::environment('testing')) {
+            color_dump('mssql up skipped');
+            return;
+        }
 
+        color_dump('mssql up');
         $conf = DB::connection('sqlsrv')->getConfig();
         color_dump($conf);
-        $res = (new \App\Helpers\SqlCmd())->outputOnError()->database($conf['database'])->file([
+        $res = (new \App\Helpers\SqlCmd())->database($conf['database'])->file([
             database_path('mssql/database/Security/PIIColumnMasterKey.sql'),
             database_path('mssql/database/Security/PIIColumnEncryptionKey.sql'),
             database_path('mssql/database/dbo/Tables/ClientAccessType.sql'),
@@ -74,7 +78,7 @@ class SetupMssql extends Migration
     {
         color_dump('mssql down');
         //$res = (new \App\Helpers\SqlCmd())->outputOnError()->file(database_path('/mssql/database/down.sql'));
-
+        /*
         $res = (new \App\Helpers\SqlCmd())->query('DROP TABLE [dbo].[ReportSubscription]');
         $res = (new \App\Helpers\SqlCmd())->query('DROP TABLE [dbo].[Campaign]');
         (new \App\Helpers\SqlCmd())->query('DROP TABLE [dbo].[Transaction]');
@@ -109,5 +113,6 @@ class SetupMssql extends Migration
         (new \App\Helpers\SqlCmd())->query('DROP TABLE [dbo].[ClientAccessType]');
         (new \App\Helpers\SqlCmd())->query('DROP COLUMN ENCRYPTION KEY [PIIColumnEncryptionKey]');
         (new \App\Helpers\SqlCmd())->query('DROP COLUMN MASTER KEY [PIIColumnMasterKey]');
+        */
     }
 }
