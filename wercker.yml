@@ -150,7 +150,7 @@ unittest:
            echo '>> PWD'
            pwd
            export DB_HOST_shopgo=$MSSQL_SERVER_LINUX_PORT_1433_TCP_ADDR
-           php artisan database:mssql:create
+           php artisan database:mssql:create --y
 
     - script:
         name: unittest
@@ -306,6 +306,7 @@ deploy-to-ecs-service:
             --cluster $STEP_CLUSTER \
             --task-definition crutils-metrics-migrate \
             --output text --query 'tasks[].taskArn')
+            echo "_TASK_ARN=${_TASK_ARN}"
     - script:
          name: Run Migration-wait
          code: |

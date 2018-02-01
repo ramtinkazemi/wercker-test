@@ -18,7 +18,7 @@ class SqlCmd
 
     public function __construct($configuration = [])
     {
-        empty($configuration) AND $configuration = \DB::connection('sqlsrv')->getConfig();
+        empty($configuration) AND $configuration = \DB::connection('sqlsrv_unittest')->getConfig();
 
         $this->initialize($configuration);
     }

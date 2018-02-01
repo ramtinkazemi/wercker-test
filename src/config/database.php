@@ -102,6 +102,25 @@ return [
             ),
         ],
 
+        // database connection to shopgo db
+        'sqlsrv_unittest' => [
+            'driver' => 'sqlsrv',
+            'host' => env('DB_HOST_unittest', 'mssql'),
+            'port' => env('DB_PORT_unittest', '1433'),
+            'database' => env('DB_DATABASE_unittest', 'forge'),
+            'username' => env('DB_USERNAME_unittest', 'forge'),
+            'password' => env('DB_PASSWORD_unittest', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            // Customized
+            'encrypt' => 'false',
+            'trust_server_certificate' => 'false',
+            'options'   => array(
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+                PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true
+            ),
+        ],
+
     ],
 
     /*
