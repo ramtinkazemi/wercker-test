@@ -150,6 +150,7 @@ unittest:
            echo '>> PWD'
            pwd
            export DB_HOST_shopgo=$MSSQL_SERVER_LINUX_PORT_1433_TCP_ADDR
+           export DB_HOST_unittest=$MSSQL_SERVER_LINUX_PORT_1433_TCP_ADDR
            php artisan database:mssql:create --y
 
     - script:
