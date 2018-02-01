@@ -136,9 +136,19 @@ unittest:
           ls -al ./src
           echo '>>> VENDOR BIN DIR'
           ls -al $WERCKER_SOURCE_DIR/src/vendor/bin
+
+    - install-packages:
+        packages: netcat
+
+    - script:
+        name: "Wait for mySQL connection"
+        code: |
+          until nc -z -v -w30 $MYSQL_PORT_3306_TCP_ADDR $MYSQL_PORT_3306_TCP_PORT; do echo "Waiting for mysql database connection..."; sleep 3; done
+
     - script:
         name: setup mysql
         code: |
+
            export DB_HOST=$MYSQL_PORT_3306_TCP_ADDR
            export DB_PORT=$MYSQL_PORT_3306_TCP_PORT
            export DB_HOST_crutils=$MYSQL_PORT_3306_TCP_ADDR
