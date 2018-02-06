@@ -25,14 +25,14 @@ class EsTransaction
     }
 
     /**
-     *
-     * Returns only the counts of a particular query and no actual transactions
-     *
-     * @param $queryString
-     * @param $index
-     * @param $indexType
-     * @return integer
-     */
+ *
+ * Returns only the counts of a particular query and no actual transactions
+ *
+ * @param $queryString
+ * @param $index
+ * @param $indexType
+ * @return integer
+ */
     public function getTotalAggResultsForQuery($queryString, $index, $indexType){
         $esi = new EsIndex();
         $client = $esi->client;
@@ -60,5 +60,39 @@ class EsTransaction
         return $hits['hits']['total'];
     }
 
+    /**
+     *
+     * Returns only the counts of a particular query and no actual transactions
+     *
+     * @param $queryString
+     * @param $index
+     * @param $indexType
+     * @return integer
+     */
+    public function getTotalAggResultsForQueryNoWildcard($queryString, $index, $indexType){
+        $esi = new EsIndex();
+        $client = $esi->client;
+        $json = '{
+                  "query": {
+                    "bool": {
+                      "must": [
+                        {
+                          "query_string": {
+                            "query": "'.$queryString.'"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "size": 0
+                }';
+        $params = [
+            'index' => $index,
+            'type' => $indexType,
+            'body' => $json
+        ];
+        $hits = $client->search($params);
+        return $hits['hits']['total'];
+    }
 
 }

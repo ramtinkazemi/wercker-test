@@ -193,7 +193,7 @@ if (! function_exists('sendToCyfe')) {
         if (stripos($status, '200') !== false)
             CRLog("debug", "success posting to Cyfe", "", __CLASS__, __FUNCTION__, __LINE__);
         else
-            CRLog("error", "error posting to Cyfe", "", __CLASS__, __FUNCTION__, __LINE__);
+            CRLog("error", "error posting to Cyfe", "status: $status, response: ".$output, __CLASS__, __FUNCTION__, __LINE__);
     }
 }
 

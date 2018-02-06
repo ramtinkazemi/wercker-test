@@ -35,9 +35,6 @@ class MemberSync
             $sql = "SELECT top 1000 a.MemberId as MemberId, (Select max(SaleDate) from dbo.[Transaction] Where MemberId = a.MemberId) as LatestTr5Date,  (Select max(ActionDate) from dbo.[Savings] Where MemberId = a.MemberId) as LatestSavingsDate,  (Select max(DateCreated) from dbo.[MemberClicks] Where MemberId = a.MemberId) as LastClickDate, a.ClientId as ClientId FROM Member a WHERE a.MemberId > $lastMemberId Order by MemberId asc;";
             $dbresults = DB::connection('sqlsrv')->select($sql);
         }
-
-
-
     }
 
     private function setMemberAggregate($obj){

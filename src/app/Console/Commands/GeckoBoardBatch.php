@@ -12,14 +12,14 @@ class GeckoBoardBatch extends Command
      *
      * @var string
      */
-    protected $signature = 'crutils:geckoboard:update';
+    protected $signature = 'crutils:geckoboard:update'; //@todo change command name
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Update the geckoboard numbers';
+    protected $description = 'Update the metrics in various dashboards';
 
     /**
      * Create a new command instance.
@@ -40,7 +40,9 @@ class GeckoBoardBatch extends Command
     {
         $gb = new CRGeckoBoard();
         $gb->sendBatchSQL();
-
+        // update cohort for customer
         $cc = new \App\CohortCustomer();
+        // update pending transactions
+        $pt = new \App\ESTransactionsApprovals\TransactionsPending([]);
     }
 }

@@ -137,8 +137,9 @@ class CRGeckoBoard
 
         $params['onduplicate'] = $this->getArraySettings($widgetHeaders, 1, "replace", "onduplicate");
         $params['cumulative'] = $this->getArraySettings($widgetHeaders, 1, "replace", "cumulative");
-
-        sendToCyfe($params, $this->endPointMemberRisk);
+        if(env('APP_ENV') == "prod") {
+            sendToCyfe($params, $this->endPointMemberRisk);
+        }
 
         CRLog("debug", "update Member dataSet complete", "", __CLASS__, __FUNCTION__, __LINE__);
     }
@@ -177,7 +178,9 @@ class CRGeckoBoard
         $params['data'][] = $tAtt;
         $params['onduplicate'] = $this->getArraySettings($widgetHeaders, 1, "replace", "onduplicate");
         $params['cumulative'] = $this->getArraySettings($widgetHeaders, 1, "replace", "cumulative");
-        sendToCyfe($params, $this->endPointTransactionsByType);
+        if(env('APP_ENV') == "prod"){
+            sendToCyfe($params, $this->endPointTransactionsByType);
+        }
         CRLog("debug", "update system dataSet complete", "", __CLASS__, __FUNCTION__, __LINE__);
     }
 
@@ -197,8 +200,9 @@ class CRGeckoBoard
         $params['data'][] = $total;
         $params['onduplicate'] = $this->getArraySettings($widgetHeaders, 1, "replace", "onduplicate");
         $params['cumulative'] = $this->getArraySettings($widgetHeaders, 1, "replace", "cumulative");
-
-        sendToCyfe($params, $this->endPointDBELKTransactions);
+        if(env('APP_ENV') == "prod") {
+            sendToCyfe($params, $this->endPointDBELKTransactions);
+        }
         CRLog("debug", "update transactions totals complete", "", __CLASS__, __FUNCTION__, __LINE__);
 
     }
@@ -222,8 +226,9 @@ class CRGeckoBoard
         $params['data'][] = $total;
         $params['onduplicate'] = $this->getArraySettings($widgetHeaders, 1, "replace", "onduplicate");
         $params['cumulative'] = $this->getArraySettings($widgetHeaders, 1, "replace", "cumulative");
-
-        sendToCyfe($params, $this->endPointreportSubscription);
+        if(env('APP_ENV') == "prod") {
+            sendToCyfe($params, $this->endPointreportSubscription);
+        }
     }
 
     public function updateTaskLog(){
