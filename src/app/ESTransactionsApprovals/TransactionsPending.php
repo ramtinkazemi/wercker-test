@@ -42,7 +42,7 @@ class TransactionsPending
      */
     private function getPendingDB()
     {
-        $rs = DB::connection('sqlsrv')->select("SELECT count(*) as total From [dbo].[Transaction] Where NetworkTranstatusId = 100;");
+        $rs = DB::connection('sqlsrv')->select("SELECT count(*) as total From [dbo].[Transaction] Where TransactionStatusId = 100;");
         $this->pendingDB['total'] = $rs[0]->total;
     }
 
