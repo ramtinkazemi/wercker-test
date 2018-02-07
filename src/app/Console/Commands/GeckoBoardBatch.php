@@ -38,12 +38,12 @@ class GeckoBoardBatch extends Command
      */
     public function handle()
     {
-        //$gb = new CRGeckoBoard();
-        //$gb->sendBatchSQL();
+        $gb = new CRGeckoBoard();
+        $gb->sendBatchSQL();
         // update cohort for customer
-        //$cc = new \App\CohortCustomer();
+        $cc = new \App\CohortCustomer();
         // update pending transactions
-        //$pt = new \App\ESTransactionsApprovals\TransactionsPending([]);
+        $pt = new \App\ESTransactionsApprovals\TransactionsPending([]);
         //update member risk pending
         $mrp = new \App\MemberRisk\CyfeMemberRiskStatus([]);
     }
