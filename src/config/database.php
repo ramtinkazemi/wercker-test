@@ -71,6 +71,22 @@ return [
             'engine' => null,
         ],
 
+        // this is the database connection to the crutils main app
+        'crutils-risk' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_crutils_risk', '127.0.0.1'),
+            'port' => env('DB_PORT_crutils_risk', '3306'),
+            'database' => env('DB_DATABASE_crutils_risk', 'forge'),
+            'username' => env('DB_USERNAME_crutils_risk', 'forge'),
+            'password' => env('DB_PASSWORD_crutils_risk', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'host' => env('DB_HOST', '127.0.0.1'),

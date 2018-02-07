@@ -197,5 +197,17 @@ if (! function_exists('sendToCyfe')) {
     }
 }
 
+if (! function_exists('cyfeGetArraySettings')) {
+    function cyfeGetArraySettings($widgetHeaders, $cumulative, $replace, $fieldToReturn)
+    {
+        $params = [];
+        foreach ($widgetHeaders as $header) {
+            $params['onduplicate'][$header] = $replace;
+            $params['cumulative'][$header] = $cumulative;
+        }
+        return $params[$fieldToReturn];
+    }
+}
+
 
 
