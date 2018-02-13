@@ -209,5 +209,24 @@ if (! function_exists('cyfeGetArraySettings')) {
     }
 }
 
+if (!function_exists('EnvDB')) {
+    /**
+     *
+     * db env variable
+     *
+     * @param $variable
+     * @return mixed
+     */
+    function envDB($variable)
+    {
+        try {
+            $t = new \App\EnvVariableRepo($variable);
+            return $t->value;
+        } catch (\Exception $e) {
+            CRLog("error", "exception $variable", $e->getMessage(), "helpers.php", __FUNCTION__, __LINE__);
+        }
+    }
+}
+
 
 
