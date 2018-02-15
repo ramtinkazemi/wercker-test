@@ -12,39 +12,49 @@ namespace App\MemberRisk;
 class CyfeMemberRisk
 {
 
+    protected $tableCounts;
+    protected $response;
+    protected $tables;
+    protected $cyfeParams;
+    protected $riskTypes;
+    protected $responseStatus; //true or false depending on the guzzle request success
+
+    public function __construct(){
+        $this->tables = ['MemberRisk', 'MemberRisk2FA', 'MemberRiskActivity', 'MemberRiskBlackList', 'MemberRiskSummary', 'MemberRiskWhiteList', 'MemberProfileRefreshQueue'];
+        $this->riskTypes = ['Gaming', 'SiteUsage', '2FA', 'PaymentDetails', 'IsRisky', 'WhiteList', 'BlackList'];
+        $this->response =  getRiskService(envDB(['CRUTILS_RISK_SUMMARY', 'http://internal-alb-crutils-metrics-2022242258.ap-southeast-2.elb.amazonaws.com:81/api/1/memberrisksummaryreport']), "GET"); //getRiskService(envDB(['CYFE_RISK_SUMMARY_URL', 'https://app.cyfe.com/api/push/5a84fe713039f3191809084036597']), "GET");
+        $this->responseStatus = $this->response['result-success'];
+
+
+
+
+        //$this->getCyfe($this->tables, $this->response['response-body']['tableCounts']);
+        //$this->sendToCyfe($this->getCyfe($this->tables, $this->response['response-body']['tableCounts']), envDB(['CYFE_RISK_SUMMARY_TABLES_URL', 'https://app.cyfe.com/api/push/5a84fe713039f3191809084036597']), "CYFE risk summary tables sent");
+    }
+
+    private function setTables(){
+        $cyfePush = new \App\CyfePush(
+            $this->tables, $this->response['response-body']['tableCounts'],
+            envDB(['CYFE_RISK_SUMMARY_TABLES_URL', 'https://app.cyfe.com/api/push/5a84fe713039f3191809084036597']),
+            0,
+            $this->response['result-success'],
+            "CYFE risk summary tables sent",
+            -1,
+            []
+        );
+    }
+
+
 
     /**
-     * Update the member dataset
-     *
+     * filter out all the categories not needed for low risk
      */
-    public function updateMemberDataSet(){
-        $params['data'] = [];
-        $widgetHeaders = [
-            'New members',
-            'New members transacting',
-            'Risk gaming medium',
-            'Risk gaming High',
-            'Risk payment high',
-        ];
+    private function prepareMemberRiskArray(){
+        foreach($this->response['response-body']['profilesBreakdown'] as $key=>$value){
 
-        //get the metrics
-        $rs = DB::connection('sqlsrv')->select("SELECT count(*) as total FROM Member as total WHERE DateJoined >= DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0);");
-        $params['data'][] = [
-            'Date' => date('Ymd'),
-            'New members' => 0+$rs[0]->total,
-            'New members transacting' => 0, //@todo
-            'Risk gaming medium' => MemberRisk::where('Fcolumn', 'S')->count(), //@todo get these from the microservice
-            'Risk gaming High' => MemberRisk::where('Fcolumn', 'T')->count(), //@todo get these from the microservice
-            'Risk payment high' => MemberRisk::where('PaymentDetailsRisk', true)->count(), //@todo get these from the microservice
-        ];
-
-        $params['onduplicate'] = cyfeGetArraySettings($widgetHeaders, 1, "replace", "onduplicate");
-        $params['cumulative'] = cyfeGetArraySettings($widgetHeaders, 1, "replace", "cumulative");
-        if(env('APP_ENV') == "prod") {
-            sendToCyfe($params, $this->endPointMemberRisk);
         }
-
-        CRLog("debug", "update Member dataSet complete", "", __CLASS__, __FUNCTION__, __LINE__);
     }
+
+
 
 }

@@ -11,6 +11,13 @@ namespace App\MemberRisk;
 use Carbon\Carbon;
 use DB;
 
+/**
+ *
+ * provides the table counts for the profiles that are processed async
+ *
+ * Class CyfeMemberRiskStatus
+ * @package App\MemberRisk
+ */
 class CyfeMemberRiskStatus
 {
     public $dbResult;

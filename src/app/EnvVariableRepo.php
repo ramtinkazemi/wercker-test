@@ -22,30 +22,39 @@ class EnvVariableRepo
 
     public $variable;
     public $value;
+    public $defaultValue;
     protected $m; //instance of EnvVariables
 
     /**
      * EnvVariable constructor.
      *
-     * @param $variable
+     * @param $variable, mixed
      * @param $value
      * @param $default
      */
     public function __construct($variable){
-        $this->variable = $variable;
+        $this->defaultValue = null;
+        if(!is_array($variable)){
+            $this->variable = $variable;
+        }elseif(is_array($variable)){ // support passing of a default value
+            $this->variable = $variable[0];
+            $this->defaultValue = $variable[1];
+        }else{
+            CRLog("error", "variable type not recognised", json_encode($variable), __CLASS__, __FUNCTION__, __LINE__);
+        }
         $this->get();
     }
 
 
     public function get(){
         // check if this is a db managed env variable
-        $this->m = Cache::remember('env:'.$this->variable, 5, function () {
+        $this->m = Cache::remember('env:'.$this->variable, env('REDIS_CACHE_EnvVariableRepo', 5), function () {
             echo getRedString("get from db\n");
             return  \App\EnvVariables::where('variable', $this->variable)->first();
         });
 
         // check what value to return
-        if($this->m != null){ //  value in db
+        if($this->m != null){ //  value exists in db
             //var_dump($this->m);
             if($this->m->enabled == true){
                 $this->value = $this->m->value;
@@ -65,11 +74,22 @@ class EnvVariableRepo
      */
     public function getSystem(){
         if($this->m == null){ // no need to go to db if we got an instance already
+            $data = ['value' => env($this->variable), 'enabled' => false];
+            if($this->defaultValue != null){
+                $data['value'] = $this->value;
+                $data['enabled'] = true;
+            }
+            //check if we got a default value we can use
+            if($this->defaultValue != null){
+                $data['value'] = $this->defaultValue;
+            }
             $v =  \App\EnvVariables::updateOrCreate(
                 ['variable' => $this->variable],
-                ['value' => env($this->variable), 'enabled' => false]
+                $data
             );
-            Cache::put('env:'.$this->variable, $v, 5);
+            Cache::put('env:'.$this->variable, $v, env('REDIS_CACHE_EnvVariableRepo', 5));
+        }else{
+            CRLog("error", getRedString("no m instance"), $this->variable, __CLASS__, __FUNCTION__, __LINE__);
         }
         $this->value = env($this->variable);
     }

@@ -13,7 +13,7 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 use Illuminate\Support\Facades\Log;
 
-if (! function_exists('array_orderby')) {
+if (!function_exists('array_orderby')) {
     /**
      * ref : http://www.php.net/manual/en/function.array-multisort.php#100534
      * example : $sortec = array_orderby($data, 'volume', SORT_DESC, 'edition', SORT_ASC);
@@ -38,7 +38,7 @@ if (! function_exists('array_orderby')) {
     }
 }
 
-if (! function_exists('array_column_sum')) {
+if (!function_exists('array_column_sum')) {
     /**
      * @param $input
      * @param $column_key
@@ -50,7 +50,7 @@ if (! function_exists('array_column_sum')) {
     }
 }
 
-if (! function_exists('color_dump')) {
+if (!function_exists('color_dump')) {
 
     /**
      *
@@ -75,7 +75,7 @@ if (! function_exists('color_dump')) {
     }
 }
 
-if (! function_exists('echo_ex')) {
+if (!function_exists('echo_ex')) {
     /**
      *
      * example : echo_ex('<info>'.'TEST'.'</info>');
@@ -96,7 +96,7 @@ if (! function_exists('echo_ex')) {
     }
 }
 
-if (! function_exists('CRLog')) {
+if (!function_exists('CRLog')) {
     /**
      *
      * example : echo_ex('<info>'.'TEST'.'</info>');
@@ -104,16 +104,15 @@ if (! function_exists('CRLog')) {
      */
     function CRLog($logLevel, $description, $message, $class, $method, $line)
     {
-        if($logLevel == ""){
+        if ($logLevel == "") {
             $logLevel = "debug";
         }
-        call_user_func('Log::'.$logLevel, $description, ["class" => $class,  'method' => $method, 'line'=>$line, 'message' => $message]); // >5.2.3
+        call_user_func('Log::' . $logLevel, $description, ["class" => $class, 'method' => $method, 'line' => $line, 'message' => $message]); // >5.2.3
     }
 }
 
 
-
-if (! function_exists('getColourString')) {
+if (!function_exists('getColourString')) {
     /**
      *
      * 31 red
@@ -135,10 +134,10 @@ if (! function_exists('getColourString')) {
     {
 
         $colours = ['red' => 31, 'green' => 32, 'blue' => 34, 'yellow' => 33];
-        if(!array_key_exists($colourCodedefault, $colours)){
+        if (!array_key_exists($colourCodedefault, $colours)) {
             $colourCodedefault = "green";
         }
-        if(!array_key_exists($colourCodeIfTrue, $colours)){
+        if (!array_key_exists($colourCodeIfTrue, $colours)) {
             $colourCodeIfTrue = "green";
         }
         $colourCode = $colours[$colourCodedefault];
@@ -169,7 +168,7 @@ if (! function_exists('getColourString')) {
  *
  * docuentation https://www.cyfe.com/api for push
  */
-if (! function_exists('sendToCyfe')) {
+if (!function_exists('sendToCyfe')) {
     function sendToCyfe($params, $endpoint)
     {
         /*
@@ -193,11 +192,11 @@ if (! function_exists('sendToCyfe')) {
         if (stripos($status, '200') !== false)
             CRLog("debug", "success posting to Cyfe", "", __CLASS__, __FUNCTION__, __LINE__);
         else
-            CRLog("error", "error posting to Cyfe", "status: $status, response: ".$output, __CLASS__, __FUNCTION__, __LINE__);
+            CRLog("error", "error posting to Cyfe", "status: $status, response: " . $output, __CLASS__, __FUNCTION__, __LINE__);
     }
 }
 
-if (! function_exists('cyfeGetArraySettings')) {
+if (!function_exists('cyfeGetArraySettings')) {
     function cyfeGetArraySettings($widgetHeaders, $cumulative, $replace, $fieldToReturn)
     {
         $params = [];
@@ -221,12 +220,104 @@ if (!function_exists('EnvDB')) {
     {
         try {
             $t = new \App\EnvVariableRepo($variable);
-            return $t->value;
+            $val = $t->value;
+            unset($t);
+            return $val;
         } catch (\Exception $e) {
-            CRLog("error", "exception $variable", $e->getMessage(), "helpers.php", __FUNCTION__, __LINE__);
+            CRLog("error", "exception ".json_encode($variable), $e->getMessage(), "helpers.php", __FUNCTION__, __LINE__);
         }
     }
 }
+
+if (!function_exists('getRiskService')) {
+    /**
+     *
+     * get risk service data
+     *
+     * @param $uri
+     * @param $method
+     * @return mixed
+     */
+    function getRiskService($uri, $method)
+    {
+        $result['result-success'] = false;
+        $result['response'] = null;
+        $result['response-body'] = null;
+        try {
+            $result['result-success'] = true;
+            $client = new \GuzzleHttp\Client();
+            $result['response'] = $client->request($method, $uri, []);
+            $result['response-body'] = json_decode($result['response']->getBody(),true);
+            return $result;
+        } catch (\Exception $e) {
+            CRLog("error", "exception", "uri $uri, method $method \n".$e->getMessage(), "helpers.php", __FUNCTION__, __LINE__);
+            return $result;
+        }
+    }
+}
+
+
+if (!function_exists('getColourString')) {
+    /**
+     *
+     * 31 red
+     * 32 green
+     * 34 blue
+     * 33 yellow
+     *
+     * Some CLI colouring
+     *
+     * @param $string
+     * @param $colourCodedefault
+     * @param $colourCodeIfTrue
+     * @param $val1
+     * @param $val2
+     * @param $operator
+     * @return string
+     */
+    function getColourString($string, $colourCodedefault, $colourCodeIfTrue, $val1, $val2, $operator)
+    {
+
+        $colours = ['red' => 31, 'green' => 32, 'blue' => 34, 'yellow' => 33];
+        if (!array_key_exists($colourCodedefault, $colours)) {
+            $colourCodedefault = "green";
+        }
+        if (!array_key_exists($colourCodeIfTrue, $colours)) {
+            $colourCodeIfTrue = "green";
+        }
+        $colourCode = $colours[$colourCodedefault];
+        if ($operator == '>' && $val1 > $val2) {
+            $colourCode = $colours[$colourCodeIfTrue];
+        }
+        if ($operator == '==' && $val1 > $val2) {
+            $colourCode = $colours[$colourCodeIfTrue];
+        }
+        if ($operator == '<' && $val1 < $val2) {
+            $colourCode = $colours[$colourCodeIfTrue];
+        }
+        if ($operator == '') { //just use the colour requested
+            $colourCode = $colours[$colourCodeIfTrue];
+        }
+        $colourCode = $colourCode . "m";
+        return "\033[$colourCode $string\033[0m";
+    }
+}
+
+if (!function_exists('getGreenString')) {
+    function getGreenString($string)
+    {
+        return  getColourString($string, "green", "green", "", "", "");
+    }
+}
+
+if (!function_exists('getRedString')) {
+    function getRedString($string)
+    {
+        return  getColourString($string, "red", "red", "", "", "");
+    }
+}
+
+
 
 
 
