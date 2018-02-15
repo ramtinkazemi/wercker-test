@@ -46,5 +46,7 @@ class GeckoBoardBatch extends Command
         $pt = new \App\ESTransactionsApprovals\TransactionsPending([]);
         //update member risk pending
         $mrp = new \App\MemberRisk\CyfeMemberRiskStatus([]);
+        // push the new member risk which uses microservice data
+        $m = new \App\MemberRisk\CyfeMemberRisk();
     }
 }
