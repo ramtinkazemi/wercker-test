@@ -195,9 +195,12 @@ class EsIndex
             $params = [
                 'index' => $index,
                 'type' => $type,
-                'body' => $json,
-                'scroll' => $scrolltime
+                'body' => $json
             ];
+
+            if($scrolltime != ""){
+                $params['scroll'] = $scrolltime;
+            }
 
             //search or scroll existing result
             if($scrollid != "") {

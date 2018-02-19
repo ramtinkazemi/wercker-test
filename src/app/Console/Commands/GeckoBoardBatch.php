@@ -48,5 +48,7 @@ class GeckoBoardBatch extends Command
         $mrp = new \App\MemberRisk\CyfeMemberRiskStatus([]);
         // push the new member risk which uses microservice data
         $m = new \App\MemberRisk\CyfeMemberRisk();
+        // crutils log numbers
+        $t = new \App\IndexCrutilsLog\CrutilsLog();
     }
 }
