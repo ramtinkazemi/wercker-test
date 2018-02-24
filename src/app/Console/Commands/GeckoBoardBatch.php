@@ -44,8 +44,8 @@ class GeckoBoardBatch extends Command
         $cc = new \App\CohortCustomer();
         // update pending transactions
         $pt = new \App\ESTransactionsApprovals\TransactionsPending([]);
-        //update member risk pending
-        $mrp = new \App\MemberRisk\CyfeMemberRiskStatus([]);
+        //update member risk pending @todo enable this once the micro service call is in place
+        // $mrp = new \App\MemberRisk\CyfeMemberRiskStatus([]);
         // push the new member risk which uses microservice data
         $m = new \App\MemberRisk\CyfeMemberRisk();
         // crutils log numbers

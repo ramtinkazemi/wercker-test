@@ -58,7 +58,6 @@ class CyfePush
         $params['data'][] = $data;
         $params['onduplicate'] = cyfeGetArraySettings($widgetHeaders, 1, "replace", "onduplicate");
         $params['cumulative'] = cyfeGetArraySettings($widgetHeaders, 1, "replace", "cumulative");
-        print_r($params);
         $this->cyfeParams = $params;
     }
 
@@ -66,7 +65,7 @@ class CyfePush
      * post to cyfe
      */
     private function setCyfe(){
-        if(env('APP_ENV') == "local") {
+        if(env('APP_ENV') == "prod") {
             sendToCyfe($this->cyfeParams, $this->endpoint);
             CRLog("debug", $this->logDescription, "", __CLASS__, __FUNCTION__, __LINE__);
         }else{

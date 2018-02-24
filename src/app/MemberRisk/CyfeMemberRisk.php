@@ -29,7 +29,7 @@ class CyfeMemberRisk
         $this->tables = ['MemberRisk', 'MemberRisk2FA', 'MemberRiskActivity', 'MemberRiskBlackList', 'MemberRiskSummary', 'MemberRiskWhiteList', 'MemberProfileRefreshQueue'];
         $this->riskTypes = ['Gaming', 'SiteUsage', '2FA', 'PaymentDetails'];
         $this->other = ['IsRisky', 'WhiteList'];
-        $this->response =  getRiskService(envDB(['CRUTILS_RISK_SUMMARY', 'http://internal-alb-crutils-metrics-2022242258.ap-southeast-2.elb.amazonaws.com:81/api/1/memberrisksummaryreport']), "GET"); //getRiskService(envDB(['CYFE_RISK_SUMMARY_URL', 'https://app.cyfe.com/api/push/5a84fe713039f3191809084036597']), "GET");
+        $this->response =  getRiskService(envDB(['CRUTILS_RISK_SUMMARY', '']), "GET");
         $this->responseStatus = $this->response['result-success'];
         $this->setTables();
         $this->setRiskTypes();
@@ -42,7 +42,7 @@ class CyfeMemberRisk
     private function setTables(){
         $cyfePush = new \App\CyfePush(
             $this->tables, $this->response['response-body']['tableCounts'],
-            envDB(['CYFE_RISK_SUMMARY_TABLES_URL', 'https://app.cyfe.com/api/push/5a85331352c7d5779794304048754']),
+            envDB(['CYFE_RISK_SUMMARY_TABLES_URL', '']),
             0,
             $this->response['result-success'],
             "CYFE risk summary tables sent",
@@ -58,7 +58,7 @@ class CyfeMemberRisk
         $data = $this->getMemberRiskArray($this->response['response-body']['profilesBreakdown']);
         $cyfePush = new \App\CyfePush(
             $this->headers, $data,
-            envDB(['CYFE_RISK_SUMMARY_MEMBER_PROFILES_URL', 'https://app.cyfe.com/api/push/5a8532c28ce727207854014048753']),
+            envDB(['CYFE_RISK_SUMMARY_MEMBER_PROFILES_URL', '']),
             0,
             $this->response['result-success'],
             "CYFE risk profiles by types",
@@ -78,13 +78,11 @@ class CyfeMemberRisk
                 $na[$riskType."-high"] = 0;
                 if(array_key_exists('high', $arr)){
                     $this->headers[] = $riskType."-high";
-                    echo "key exists high for $riskType \n";
                     $na[$riskType."-high"] = $arr['high'];
                 }
                 if(array_key_exists('medium', $arr)){
                     if($arr['medium'] > 0){
                         $this->headers[] = $riskType."-medium";
-                        echo "key exists medium for $riskType \n";
                         $na[$riskType."-medium"] = $arr['medium'];
                     }
                 }

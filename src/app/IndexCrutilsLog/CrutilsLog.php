@@ -68,7 +68,7 @@ class CrutilsLog
 
     private function setCyfe($result){
         $headers = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
-        $c = new \App\CyfePush($headers, $result, envDB(['CYFE_CRUTILS_LOG_URL' , 'https://app.cyfe.com/api/push/5a8a50fca04bc2417757474056607']), 0, true, '', '-1', []);
+        $c = new \App\CyfePush($headers, $result, envDB(['CYFE_CRUTILS_LOG_URL' , '']), 0, true, '', '-1', []);
     }
 
 }

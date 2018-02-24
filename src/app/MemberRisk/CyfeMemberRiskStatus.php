@@ -32,6 +32,9 @@ class CyfeMemberRiskStatus
     }
 
 
+    /**
+     * @todo switch this to use the service instead of direct db access
+     */
     private function getPendingToProcess(){
         $sql = "select count(*) as total, (SELECT created_at FROM MemberProfileRefreshQueue order by created_at asc LIMIT 1) as created_at FROM MemberProfileRefreshQueue;";
         $this->dbResult =  DB::connection('crutils-risk')->select($sql);
