@@ -31,12 +31,12 @@ class CohortCustomer
     private function getAll($type){
         $key = "membersCohort";
 
-        $data = array();
         $data = Cache::remember($key, 720, function () {
             $sql = "SET NOCOUNT ON; EXEC Report_GetMemberTransActivitySummary";
             $dbh = DB::connection('sqlsrv')->getPdo();
             $sth = $dbh->prepare($sql);
             $sth->execute();
+            $data = array();
             $data['tr5savings'] = $sth->fetchAll(\PDO::FETCH_CLASS);
             $sth->nextRowset();
             $data['noTR5savings'] = $sth->fetchAll(\PDO::FETCH_CLASS);
