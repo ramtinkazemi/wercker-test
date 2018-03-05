@@ -2,15 +2,20 @@ build:
     root_path: 'src/'
     nodes:
         analysis:
-              project_setup:
-                  override:
-                      - 'true'
-              tests:
-                  override:
-                      - php-scrutinizer-run
+            dependencies:
+                override:
+                    - composer install --ignore-platform-reqs --no-interaction --no-scripts --no-plugins
+            project_setup:
+                override:
+                    - 'true'
+            tests:
+                override:
+                    - php-scrutinizer-run
 
         testNode:
             dependencies:
+                override:
+                    - composer install --no-interaction
                 before:
                     - sudo docker run -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=<YourStrong!Passw0rd>' -p 1433:1433 --name mssql -d microsoft/mssql-server-linux:2017-latest
                     - sudo apt-get -y install unixodbc-dev
