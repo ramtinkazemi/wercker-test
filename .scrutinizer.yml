@@ -1,0 +1,87 @@
+build:
+    root_path: 'src/'
+    nodes:
+        analysis:
+              project_setup:
+                  override:
+                      - 'true'
+              tests:
+                  override:
+                      - php-scrutinizer-run
+
+        testNode:
+            dependencies:
+                before:
+                    - sudo docker run -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=<YourStrong!Passw0rd>' -p 1433:1433 --name mssql -d microsoft/mssql-server-linux:2017-latest
+                    - sudo apt-get -y install unixodbc-dev
+                    - pecl install pdo_sqlsrv
+                    - sudo apt-get install -y apt-transport-https
+                    - curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add - && curl https://packages.microsoft.com/config/ubuntu/14.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+                    - sudo apt-get update -y
+                    - sudo ACCEPT_EULA=y DEBIAN_FRONTEND=noninteractive apt-get install msodbcsql -yqq
+                    - sudo ACCEPT_EULA=y DEBIAN_FRONTEND=noninteractive apt-get install mssql-tools -yqq
+                    - until nc -zv -w30 localhost 1433; do echo "Waiting for mysql database connection..."; sleep 3; done
+                    - docker exec mssql /opt/mssql-tools/bin/sqlcmd -U SA -P '<YourStrong!Passw0rd>' -b -Q 'CREATE DATABASE ShopGo_DB_test'
+                    - mysql -e "CREATE DATABASE CRutils_metrics"
+                    - mysql -e "CREATE DATABASE CRutils"
+            environment:
+                docker:
+                    cache:
+                        images:
+                            - "microsoft/mssql-server-linux:2017-latest"
+                php: 7.1
+                mysql: 5.7
+                elasticsearch: 5.5.0
+                timezone: UTC
+                variables:
+                    APP_NAME: 'Laravel'
+                    APP_ENV: 'testing'
+                    APP_KEY: 'base64:T1tgOF2G+RHlRiv9s9l60y03dshsX7xaOdHMk9eF/eE='
+                    APP_DEBUG: 'true'
+                    APP_LOG_LEVEL: 'debug'
+                    APP_URL: 'http://localhost'
+                    DB_DATABASE: 'CRutils_metrics'
+                    DB_DATABASE_crutils: 'CRutils'
+                    DB_DATABASE_shopgo: 'ShopGo_DB_test'
+                    DB_PASSWORD: ''
+                    DB_PASSWORD_crutils: ''
+                    DB_PASSWORD_shopgo: '<YourStrong!Passw0rd>'
+                    DB_USERNAME: 'root'
+                    DB_USERNAME_crutils: 'root'
+                    DB_USERNAME_shopgo: 'SA'
+                    DB_HOST_unittest: '172.17.0.2'
+                    DB_PORT_unittest: '1433'
+                    DB_DATABASE_unittest: 'ShopGo_DB_test'
+                    DB_USERNAME_unittest: 'SA'
+                    DB_PASSWORD_unittest: '<YourStrong!Passw0rd>'
+                    ES_HOST: 'localhost:9200'
+                    ES_REPORT_SUB_INDEX: 'logstash-report-subscription-prod-v2'
+                    ES_REPORT_SUB_TYPE: 'report-subscription'
+                    FILESYSTEM_DRIVER: 'local'
+                    BROADCAST_DRIVER: 'sns'
+                    CACHE_DRIVER: 'array'
+                    SESSION_DRIVER: 'array'
+                    QUEUE_DRIVER: 'sync'
+                    REDIS_HOST: 'localhost'
+                    REDIS_PASSWORD: 'null'
+                    REDIS_PORT: '6379'
+                    MAIL_DRIVER: 'smtp'
+                    MAIL_HOST: 'smtp.mailtrap.io'
+                    MAIL_PORT: '2525'
+                    RESOURCE_NAME: 'promoms'
+                    
+            tests:
+                stop_on_failure: true
+                override:
+                    -
+                        command: ./vendor/bin/phpunit --coverage-clover=./code_coverage.xml
+                        coverage:
+                            file: ./code_coverage.xml
+                            format: php-clover        
+checks:
+    php: true
+coding_style:
+    php: {  }
+filter:
+    excluded_paths:
+        - src/vendor/*
