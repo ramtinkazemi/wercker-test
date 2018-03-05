@@ -88,6 +88,7 @@ class SQSMetric
      */
     private function getCSV()
     {
+        $lines = array();
         $lines[] = "queue,messages visbile";
         foreach ($this->data as $key => $queue) {
             if($queue['visibleMessages'] > 0){

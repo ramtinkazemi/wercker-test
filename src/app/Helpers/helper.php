@@ -84,13 +84,8 @@ if (!function_exists('echo_ex')) {
     function echo_ex(...$args)
     {
         $output = new BufferedOutput(OutputInterface::VERBOSITY_VERY_VERBOSE, true);
-        //$style = new OutputFormatterStyle('red', 'yellow', array('bold', 'blink'));
-        //$output->getFormatter()->setStyle('fire', $style);
-
         foreach ($args as $x) {
-            //$output->writeln('<info>'.'TEST'.'</info>');
             $output->writeln($x);
-
         }
         echo $output->fetch();
     }
@@ -171,15 +166,6 @@ if (!function_exists('getColourString')) {
 if (!function_exists('sendToCyfe')) {
     function sendToCyfe($params, $endpoint)
     {
-        /*
-        $endpoint = '.../api/push/5151e3ec53783701321099125233'; //https://app.cyfe.com/api/push/5a46105ae0e663525741213915974
-        $data = array();
-        $data['data'][] = array('Date' => '20130320', 'Users' => '1');
-        $data['onduplicate'] = array('Users' => 'replace');
-        $data['color'] = array('Users' => '#52ff7f');
-        $data['type'] = array('Users' => 'line');
-        */
-
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $endpoint);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -240,6 +226,7 @@ if (!function_exists('getRiskService')) {
      */
     function getRiskService($uri, $method)
     {
+        $result = array();
         $result['result-success'] = false;
         $result['response'] = null;
         $result['response-body'] = null;
