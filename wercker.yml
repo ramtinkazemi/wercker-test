@@ -59,7 +59,7 @@ deploy-to-ecs-task-definition:
         region: $STEP_AWS_DEFAULT_REGION
         task-definition-name: ramtin-test
         container-memory: 128
-        container_command: null
+        container_command: "[\"/usr/local/bin/php\", \" test.php\"]"
         task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
 
 

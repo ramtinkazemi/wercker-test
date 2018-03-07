@@ -2,7 +2,7 @@
     "family": "${STEP_TASK_DEFINITION_NAME}",
     "containerDefinitions":  [
       {
-        "name": "php-fpm",
+        "name": "php-base-ms",
         "image": "quay.io/cashrewards/php-base-ms:master",
         "essential": true,
         "command": ${STEP_DOCKER_COMMAND},
