@@ -68,8 +68,23 @@ deploy-to-ecs-scheduled-task:
   steps:
 
     #####
-    # Scheduled task: every 10 minutes
+    # Scheduled task: every 1 minutes
     #####
+    - steven-rho/aws-ecs-scheduled-task@0.0.4:
+       name: daily-every-2-minutes-ramtin-test
+       key: $STEP_AWS_ACCESS_KEY_ID
+       secret: $STEP_AWS_SECRET_ACCESS_KEY
+       region: $STEP_AWS_DEFAULT_REGION
+       schedule-rule-name: daily-every-2-minutes-ramtin-test
+       schedule-expression: "rate(2 minute)"
+       schedule-state: $STEP_SCHEDULE_STATE
+       schedule-description: "Tasks that need to run every 2 minutes for ramtin-test"
+       cluster-name: ${STEP_CLUSTER}
+       task-count: 1
+       task-definition-name: ramtin-test
+       target-id: ramtin-test
+       target-template: wercker/scheduled_task/ecs_task_target.json.template
+    
     - steven-rho/aws-ecs-scheduled-task@0.0.4:
        name: daily-every-1-minutes-ramtin-test
        key: $STEP_AWS_ACCESS_KEY_ID
@@ -84,3 +99,4 @@ deploy-to-ecs-scheduled-task:
        task-definition-name: ramtin-test
        target-id: ramtin-test
        target-template: wercker/scheduled_task/ecs_task_target.json.template
+    
