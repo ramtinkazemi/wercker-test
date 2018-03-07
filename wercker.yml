@@ -76,7 +76,7 @@ deploy-to-ecs-scheduled-task:
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
        schedule-rule-name: daily-every-2-minutes-ramtin-test
-       schedule-expression: "rate(2 minute)"
+       schedule-expression: "rate(2 minutes)"
        schedule-state: $STEP_SCHEDULE_STATE
        schedule-description: "Tasks that need to run every 2 minutes for ramtin-test"
        cluster-name: ${STEP_CLUSTER}
