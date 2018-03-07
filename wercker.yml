@@ -6,19 +6,6 @@ box:
   registry: https://quay.io
 
 dev:
-  services:
-    - id: mysql
-      env:
-        MYSQL_DATABASE: CRutils_metrics
-        MYSQL_ROOT_PASSWORD: "<YourStrong!Passw0rd>"
-        MYSQL_USER: CRutils_metrics
-        MYSQL_PASSWORD: CRutils_metrics
-
-    - id: microsoft/mssql-server-linux:latest
-      env:
-        ACCEPT_EULA: Y
-        SA_PASSWORD: "<YourStrong!Passw0rd>"
-
   steps:
     - script:
         name: test
@@ -39,7 +26,6 @@ dev:
         name: set permission
         code: |
            chown -R :www-data /var/www/html
-           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
 
 #    - script:
 #        name: "Wait for mySQL connection"
@@ -54,306 +40,28 @@ dev:
 
 build:
   steps:
-    - script:
-        name: test
-        code: |
-          echo '--- WHOAMI'
-          whoami
-          echo '--- pwd'
-          pwd
-           echo '--- WERCKER_SOURCE_DIR'
-           ls -al $WERCKER_SOURCE_DIR
-          echo '--- WERCKER_SOURCE_DIR/src'
-          ls -al $WERCKER_SOURCE_DIR/src
-
-    - script:
-        name: update dependencies
-        code: |
-          export COMPOSER_CACHE_DIR="${WERCKER_CACHE_DIR}/wercker/composer"
-          mkdir -p $COMPOSER_CACHE_DIR
-          export COMPOSER_ALLOW_SUPERUSER=1
-          composer self-update
-          composer update --no-interaction --working-dir=./src
-
-
-
-    - wacul/store-link:
-        type: store
-        prefix: src/vendor/bin
 
     - script:
         name: test
         code: |
-          ls -al $WERCKER_SOURCE_DIR/src/vendor/bin
+          echo "Testing ..."
 
-  after-steps:
-      - install-packages:
-          packages: curl
-      - slack-notifier:
-          url: $SLACK_WEBHOOK_URL
-          channel: releases
-          username: wercker
 
-#    - script:
-#        name: copy files to output
-#        code: |
-#          cp -Rp $WERCKER_SOURCE_DIR/src $WERCKER_OUTPUT_DIR
-#          cp -Rp $WERCKER_SOURCE_DIR/wercker $WERCKER_OUTPUT_DIR
-#          cp -Rp $WERCKER_SOURCE_DIR/wercker.yml $WERCKER_OUTPUT_DIR/
-
-#    - script:
-#        name: set permission
-#        code: |
-#           chown -R :www-data /var/www/html
-#           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
-
-unittest:
-  services:
-    - id: mysql
-      env:
-        MYSQL_DATABASE: CRutils_metrics
-        MYSQL_ROOT_PASSWORD: "<YourStrong!Passw0rd>"
-        MYSQL_USER: CRutils_metrics
-        MYSQL_PASSWORD: CRutils_metrics
-
-    - id: microsoft/mssql-server-linux:latest
-      env:
-        ACCEPT_EULA: Y
-        SA_PASSWORD: "<YourStrong!Passw0rd>"
-  steps:
-    - wacul/store-link:
-        type: restore
-        prefix: src/vendor/bin
-
-    - script:
-        name: check html files
-        code: |
-          echo '>>> $WERCKER_SOURCE_DIR'
-          ls -al $WERCKER_SOURCE_DIR
-          echo '>>> $WERCKER_OUTPUT_DIR'
-          ls -al $WERCKER_OUTPUT_DIR
-          echo '>>> SOURCE DIR'
-          ls -al ./src
-          echo '>>> VENDOR BIN DIR'
-          ls -al $WERCKER_SOURCE_DIR/src/vendor/bin
-
-    - install-packages:
-        packages: netcat
-
-    - script:
-        name: "Wait for mySQL connection"
-        code: |
-          until nc -z -v -w30 $MYSQL_PORT_3306_TCP_ADDR $MYSQL_PORT_3306_TCP_PORT; do echo "Waiting for mysql database connection..."; sleep 3; done
-
-    - script:
-        name: setup mysql
-        code: |
-
-           export DB_HOST=$MYSQL_PORT_3306_TCP_ADDR
-           export DB_PORT=$MYSQL_PORT_3306_TCP_PORT
-           export DB_HOST_crutils=$MYSQL_PORT_3306_TCP_ADDR
-           export DB_PORT_crutils=$MYSQL_PORT_3306_TCP_PORT
-    - script:
-        name: setup mssql
-        code: |
-           cd $WERCKER_SOURCE_DIR/src
-           echo '>> PWD'
-           pwd
-           export DB_HOST_shopgo=$MSSQL_SERVER_LINUX_PORT_1433_TCP_ADDR
-           export DB_HOST_unittest=$MSSQL_SERVER_LINUX_PORT_1433_TCP_ADDR
-           php artisan database:mssql:create --y
-
-    - script:
-        name: unittest
-        code: |
-           echo '>> PWD'
-           pwd
-           cd $WERCKER_SOURCE_DIR/src
-           echo '>> PHPUNIT'
-           vendor/bin/phpunit --debug
-
-  after-steps:
-      - install-packages:
-          packages: curl
-      - slack-notifier:
-          url: $SLACK_WEBHOOK_URL
-          channel: releases
-          username: wercker
-
-push-to-quayio:
-  steps:
-    - script:
-        name: test
-        code: |
-          pwd
-          ls -al $WERCKER_SOURCE_DIR
-          ls -al $WERCKER_SOURCE_DIR/src
-          ls -al $WERCKER_OUTPUT_DIR
-
-    - script:
-        name: copy source code
-        code: |
-           cp -Rp $WERCKER_SOURCE_DIR/src/* /var/www/html
-#    - script:
-#        name: update dependencies
-#        code: |
-#          export COMPOSER_ALLOW_SUPERUSER=1
-#          composer update --no-interaction -d=/var/www/html
-    - script:
-        name: set permission
-        code: |
-           chown -R :www-data /var/www/html
-           chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
-
-    - internal/docker-push:
-        username: $QUAYIO_USERNAME
-        password: $QUAYIO_PASSWORD
-        repository: quay.io/cashrewards/crutils-metrics
-        registry: https://quay.io
-        tag: $WERCKER_GIT_BRANCH
-        working-dir: /var/www/html
-        cmd: /run.sh
-        disable-sync: false
-        volumes: /etc/nginx/conf.d/,/var/www/html/
-
-    - script:
-        name: Copy wercker files for deployment
-        code: |
-          cp -Rp $WERCKER_SOURCE_DIR/wercker $WERCKER_OUTPUT_DIR
-          cp -Rp $WERCKER_SOURCE_DIR/wercker.yml $WERCKER_OUTPUT_DIR/
-
-  after-steps:
-      - install-packages:
-          packages: curl
-      - slack-notifier:
-          url: $SLACK_WEBHOOK_URL
-          channel: releases
-          username: wercker
-
-#      - install-packages:
-#          packages: ruby
-#      - wantedly/pretty-slack-notify:
-#          webhook_url: $SLACK_WEBHOOK_URL
-#          channel: releases
-#          username: wercker
-
-#####
-#
-#   Register Task Definition 
-#
-# For your Local test :
-#   wercker --environment ./wercker/.env.wercker.deploy deploy --pipeline deploy-to-ecs-task-definition
-#
 deploy-to-ecs-task-definition:
   box: quay.io/steven_rho/aws-cli
   #box: python:3-slim
   steps:
     ### Task definition for sending metrics to geckoboard
     - steven-rho/aws-ecs-task-definition@0.0.1:
-        name: Setup Task Definition (crutils-metrics)
+        name: Setup Task Definition (ramtin-test)
         key: $STEP_AWS_ACCESS_KEY_ID
         secret: $STEP_AWS_SECRET_ACCESS_KEY
         region: $STEP_AWS_DEFAULT_REGION
-        task-definition-name: crutils-metrics
-        container-memory: 512
+        task-definition-name: ramtin-test
+        container-memory: 128
         container_command: null
-        task_definition_template: wercker/task_definition/task_definition.json.template
-    ### Task definition for sending metrics to geckoboard
-    - steven-rho/aws-ecs-task-definition@0.0.1:
-        name: Setup Task Definition (crutils-geckoboard)
-        key: $STEP_AWS_ACCESS_KEY_ID
-        secret: $STEP_AWS_SECRET_ACCESS_KEY
-        region: $STEP_AWS_DEFAULT_REGION
-        task-definition-name: crutils-metrics-geckoboard
-        container-memory: 512
-        container_command: "[\"/usr/local/bin/php\",\"/var/www/html/artisan\", \"crutils:geckoboard:update\"]"
         task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
 
-    - steven-rho/aws-ecs-task-definition@0.0.1:
-        name: Setup Task Definition (crutils-metrics-migrate)
-        key: $STEP_AWS_ACCESS_KEY_ID
-        secret: $STEP_AWS_SECRET_ACCESS_KEY
-        region: $STEP_AWS_DEFAULT_REGION
-        task-definition-name: crutils-metrics-migrate
-        container-memory: 512
-        container_command: "[\"/usr/local/bin/php\",\"/var/www/html/artisan\", \"migrate\"]"
-        task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
-
-  after-steps:
-      - install-packages:
-          packages: curl
-      - slack-notifier:
-          url: $SLACK_WEBHOOK_URL
-          channel: releases
-          username: wercker
-
-
-
-#####
-#
-#   Register Service
-#
-# For your Local test :
-#   wercker --environment ./wercker/.env.wercker.deploy deploy --pipeline deploy-to-ecs-service
-#
-deploy-to-ecs-service:
-  box: quay.io/steven_rho/aws-cli
-  steps:
-
-    - script:
-         name: Run Migration
-         code: |
-            export STEP_AWS_PROFILE=wercker-step-aws-ecs
-
-            aws configure set aws_access_key_id ${STEP_AWS_ACCESS_KEY_ID} --profile ${STEP_AWS_PROFILE}
-            aws configure set aws_secret_access_key ${STEP_AWS_SECRET_ACCESS_KEY} --profile ${STEP_AWS_PROFILE}
-            aws configure set region ${STEP_AWS_DEFAULT_REGION} --profile ${STEP_AWS_PROFILE}
-
-    - script:
-         name: Run Migration-run task
-         code: |
-            export _TASK_ARN=$(aws ecs run-task \
-            --profile ${STEP_AWS_PROFILE} \
-            --cluster $STEP_CLUSTER \
-            --task-definition crutils-metrics-migrate \
-            --output text --query 'tasks[].taskArn')
-            echo "_TASK_ARN=${_TASK_ARN}"
-    - script:
-         name: Run Migration-wait
-         code: |
-            aws ecs wait tasks-stopped \
-            --profile ${STEP_AWS_PROFILE} \
-            --cluster ${STEP_CLUSTER} \
-            --tasks ${_TASK_ARN}
-
-
-    - steven-rho/aws-ecs-service:
-        name: Setup Service (crutils-metrics)
-        key: $STEP_AWS_ACCESS_KEY_ID
-        secret: $STEP_AWS_SECRET_ACCESS_KEY
-        region: $STEP_AWS_DEFAULT_REGION
-        cluster-name: $STEP_CLUSTER
-        service-name: svc-crutils-metrics
-        task-definition-name: crutils-metrics
-        desired-count: 1
-        service-template: wercker/service/service.json.template
-
-
-
-  after-steps:
-      - install-packages:
-          packages: curl
-      - slack-notifier:
-          url: $SLACK_WEBHOOK_URL
-          channel: releases
-          username: wercker
-
-#      - install-packages:
-#          packages: ruby
-#      - wantedly/pretty-slack-notify:
-#          webhook_url: $SLACK_WEBHOOK_URL
-#          channel: releases
-#          username: wercker
 
 deploy-to-ecs-scheduled-task:
   box: quay.io/steven_rho/aws-cli
@@ -363,16 +71,16 @@ deploy-to-ecs-scheduled-task:
     # Scheduled task: every 10 minutes
     #####
     - steven-rho/aws-ecs-scheduled-task@0.0.4:
-       name: daily-every-10-minutes
+       name: daily-every-1-minutes-ramtin-test
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
-       schedule-rule-name: daily-every-10-minutes
-       schedule-expression: "cron(*/10 * * * ? *)"
+       schedule-rule-name: daily-every-1-minutes-ramtin-test
+       schedule-expression: "cron(* * * * *)"
        schedule-state: $STEP_SCHEDULE_STATE
-       schedule-description: "Tasks that need to run every 10 minutes like geckoboard dataset"
+       schedule-description: "Tasks that need to run every 1 minutes for ramtin-test"
        cluster-name: ${STEP_CLUSTER}
        task-count: 1
-       task-definition-name: crutils-metrics-geckoboard
-       target-id: crutils-metrics-geckoboard
+       task-definition-name: ramtin-test
+       target-id: ramtin-test
        target-template: wercker/scheduled_task/ecs_task_target.json.template
