@@ -98,4 +98,4 @@ delete-ecs-scheduled-task:
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
        schedule-rule-name: $STEP_SCHEDULE_NAME
-       target-id: $STEP_TARGET_ID    
+       target-id: $STEP_TARGET_ID
