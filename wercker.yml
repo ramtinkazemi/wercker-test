@@ -71,7 +71,7 @@ deploy-to-ecs-scheduled-task:
     # Scheduled task: every 1 minutes
     #####
     - steven-rho/aws-ecs-scheduled-task@0.0.4:
-       name: Deploy scheduled task task ($STEP_SCHEDULE_NAME)
+       name: Deploy scheduled task ($STEP_SCHEDULE_NAME)
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
@@ -85,3 +85,17 @@ deploy-to-ecs-scheduled-task:
        target-id: $STEP_TARGET_ID
        target-template: wercker/scheduled_task/ecs_task_target.json.template
     
+delete-ecs-scheduled-task:
+  box: quay.io/steven_rho/aws-cli
+  steps:
+
+    #####
+    # Delete event target and rules 
+    #####
+    - ramtinkazemi/aws-ecs-remove-scheduled-task@0.0.1:
+       name: Removing scheduled task ($STEP_SCHEDULE_NAME)
+       key: $STEP_AWS_ACCESS_KEY_ID
+       secret: $STEP_AWS_SECRET_ACCESS_KEY
+       region: $STEP_AWS_DEFAULT_REGION
+       schedule-rule-name: $STEP_SCHEDULE_NAME
+       target-id: $STEP_TARGET_ID    
