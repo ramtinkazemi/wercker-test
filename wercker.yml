@@ -53,11 +53,11 @@ deploy-to-ecs-task-definition:
   steps:
     ### Task definition for sending metrics to geckoboard
     - steven-rho/aws-ecs-task-definition@0.0.1:
-        name: Setup Task Definition (ramtin-test)
+        name: Setup Task Definition ($STEP_TASK_DEFINITION_NAME)
         key: $STEP_AWS_ACCESS_KEY_ID
         secret: $STEP_AWS_SECRET_ACCESS_KEY
         region: $STEP_AWS_DEFAULT_REGION
-        task-definition-name: ramtin-test
+        task-definition-name: STEP_TASK_DEFINITION_NAME
         container-memory: 128
         container_command: "[\"/usr/local/bin/php\", \"/var/www/html/public/index.php\"]"
         task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
@@ -71,17 +71,17 @@ deploy-to-ecs-scheduled-task:
     # Scheduled task: every 1 minutes
     #####
     - steven-rho/aws-ecs-scheduled-task@0.0.4:
-       name: daily-every-2-minutes-ramtin-test
+       name: Deploy scheduled task task ($STEP_SCHEDULE_NAME)
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
-       schedule-rule-name: daily-every-2-minutes-ramtin-test
-       schedule-expression: "rate(2 minutes)"
+       schedule-rule-name: $STEP_SCHEDULE_NAME
+       schedule-expression: $STEP_SCHEDULE_EXPRESSION
        schedule-state: $STEP_SCHEDULE_STATE
-       schedule-description: "Tasks that need to run every 2 minutes for ramtin-test"
-       cluster-name: ${STEP_CLUSTER}
-       task-count: 1
-       task-definition-name: ramtin-test
-       target-id: ramtin-test
+       schedule-description: $STEP_SCHEDULE_DESC 
+       cluster-name: $STEP_CLUSTER
+       task-count: $STEP_TASK_COUNT
+       task-definition-name: $STEP_TASK_DEFINITION_NAME
+       target-id: $STEP_TARGET_ID
        target-template: wercker/scheduled_task/ecs_task_target.json.template
     
