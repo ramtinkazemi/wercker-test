@@ -71,11 +71,11 @@ deploy-to-ecs-scheduled-task:
     # Scheduled task: every 1 minutes
     #####
     - steven-rho/aws-ecs-scheduled-task@0.0.4:
-       name: Deploy scheduled task ($STEP_SCHEDULE_NAME)
+       name: Deploy scheduled task ($STEP_SCHEDULE_RULE_NAME)
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
-       schedule-rule-name: $STEP_SCHEDULE_NAME
+       schedule-rule-name: $STEP_SCHEDULE_RULE_NAME
        schedule-expression: "$STEP_SCHEDULE_EXPRESSION"
        schedule-state: $STEP_SCHEDULE_STATE
        schedule-description: $STEP_SCHEDULE_DESC
@@ -93,9 +93,9 @@ delete-ecs-scheduled-task:
     # Delete scheduled task target and rule
     #####
     - ramtinkazemi/aws-ecs-delete-scheduled-task@0.0.1:
-       name: Removing scheduled task ($STEP_SCHEDULE_NAME)
+       name: Removing scheduled task ($STEP_SCHEDULE_RULE_NAME)
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
-       schedule-rule-name: $STEP_SCHEDULE_NAME
+       schedule-rule-name: $STEP_SCHEDULE_RULE_NAME
        target-id: $STEP_TARGET_ID
