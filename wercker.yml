@@ -53,11 +53,11 @@ deploy-to-ecs-task-definition:
   steps:
     ### Task definition for sending metrics to geckoboard
     - steven-rho/aws-ecs-task-definition@0.0.1:
-        name: Setup Task Definition ($STEP_TASK_DEFINITION_NAME)
+        name: Setup Task Definition (${STEP_TASK_DEFINITION_NAME})
         key: $STEP_AWS_ACCESS_KEY_ID
         secret: $STEP_AWS_SECRET_ACCESS_KEY
         region: $STEP_AWS_DEFAULT_REGION
-        task-definition-name: STEP_TASK_DEFINITION_NAME
+        task-definition-name: $STEP_TASK_DEFINITION_NAME
         container-memory: 128
         container_command: "[\"/usr/local/bin/php\", \"/var/www/html/public/index.php\"]"
         task_definition_template: wercker/task_definition/task_definition.json.nonginx.template
@@ -71,7 +71,7 @@ deploy-to-ecs-scheduled-task:
     # Scheduled task: every 1 minutes
     #####
     - steven-rho/aws-ecs-scheduled-task@0.0.4:
-       name: Deploy scheduled task ($STEP_SCHEDULE_RULE_NAME)
+       name: Deploy scheduled task (${STEP_SCHEDULE_RULE_NAME})
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
