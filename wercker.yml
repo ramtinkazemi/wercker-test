@@ -92,7 +92,7 @@ delete-ecs-scheduled-task:
     #####
     # Delete scheduled task target and rule
     #####
-    - ramtinkazemi/aws-ecs-delete-scheduled-task@0.0.1:
+    - ramtinkazemi/aws-ecs-delete-scheduled-task@0.0.2:
        name: Removing scheduled task ($STEP_SCHEDULE_RULE_NAME)
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
