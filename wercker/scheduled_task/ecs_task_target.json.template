@@ -1,5 +1,5 @@
 {
-  "Rule": "${STEP_APP_NAME}-${$STEP_SCHEDULE_RULE_NAME}",
+  "Rule": "${STEP_APP_NAME}-${STEP_SCHEDULE_RULE_NAME}",
   "Targets": [
     {
       "Id": "${STEP_TARGET_ID}",
