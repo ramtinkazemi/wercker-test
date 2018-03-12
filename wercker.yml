@@ -70,8 +70,8 @@ deploy-to-ecs-scheduled-task:
     #####
     # Scheduled task: every 1 minutes
     #####
-    - ramtinkazemi/aws-ecs-add-scheduled-task@0.0.1:
-       name: Deploy scheduled task {$STEP_SCHEDULE_RULE_NAME}
+    - ramtinkazemi/aws-ecs-add-scheduled-task@0.0.3:
+       name: Deploy scheduled task $STEP_SCHEDULE_RULE_NAME
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
