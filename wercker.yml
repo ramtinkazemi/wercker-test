@@ -108,9 +108,9 @@ aws-ecs-delete-all-scheduled-tasks:
     #####
     # Delete all scheduled tasks related to an app
     #####
-    - ramtinkazemi/aws-ecs-delete-all-scheduled-tasks@0.0.1:
-       name: Removing scheduled tasks for $APP_NAME
+    - ramtinkazemi/aws-ecs-delete-all-scheduled-tasks@0.0.2:
+       name: Removing scheduled tasks for $STEP_APP_NAME
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
-       app-name: $APP_NAME
+       app-name: $STEP_APP_NAME
