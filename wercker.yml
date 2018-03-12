@@ -75,7 +75,7 @@ deploy-to-ecs-scheduled-task:
        key: $STEP_AWS_ACCESS_KEY_ID
        secret: $STEP_AWS_SECRET_ACCESS_KEY
        region: $STEP_AWS_DEFAULT_REGION
-       app-name: $APP_NAME
+       app-name: $STEP_APP_NAME
        schedule-rule-name: $STEP_SCHEDULE_RULE_NAME
        schedule-expression: "$STEP_SCHEDULE_EXPRESSION"
        schedule-state: $STEP_SCHEDULE_STATE
